@@ -59,6 +59,24 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
+CREATE OR REPLACE FUNCTION "public"."check_balance_nonnegative"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$ DECLARE current_balance BIGINT;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0) INTO current_balance
+  FROM ledger_entries WHERE user_id = NEW.user_id;
+
+  IF current_balance < 0 THEN
+    RAISE EXCEPTION 'Insufficient balance for user %: would result in %', NEW.user_id, current_balance;
+  END IF;
+  RETURN NEW;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."check_balance_nonnegative"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ BEGIN
@@ -166,7 +184,6 @@ CREATE OR REPLACE FUNCTION "public"."get_or_create_match"("p_game_type" "text") 
   v_match_id UUID;
   target_time TIMESTAMPTZ;
 BEGIN
-  -- Calculate the next 3-minute mark
   target_time := date_trunc('hour', now()) + 
                  ((FLOOR(EXTRACT(minute FROM now()) / 3) + 1) * 3) * INTERVAL '1 minute';
 
@@ -177,7 +194,7 @@ BEGIN
 
   IF v_match_id IS NULL THEN
     INSERT INTO matches (game_type, scheduled_start, entry_fee, pool_size, min_players, status)
-    VALUES (p_game_type, target_time, 50, 50, 2, 'waiting') -- 3 min interval, 2 min players
+    VALUES (p_game_type, target_time, 50, 50, 2, 'waiting')
     RETURNING id INTO v_match_id;
   END IF;
 
@@ -207,6 +224,22 @@ END;
 
 
 ALTER FUNCTION "public"."get_user_active_matches"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_user_balance"() RETURNS bigint
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE v_balance BIGINT;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance
+  FROM ledger_entries
+  WHERE user_id = auth.uid();
+  
+  RETURN v_balance;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_user_balance"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_match_history"() RETURNS "jsonb"
@@ -260,6 +293,126 @@ END;
 
 ALTER FUNCTION "public"."is_admin"() OWNER TO "postgres";
 
+
+CREATE OR REPLACE FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_balance BIGINT;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance
+  FROM ledger_entries
+  WHERE user_id = p_user_id
+  FOR UPDATE;
+
+  INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after, created_by)
+  VALUES (p_user_id, p_amount, 'deposit', p_reference_id, p_idempotency_key, v_balance + p_amount, p_admin_id);
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_balance BIGINT;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance
+  FROM ledger_entries
+  WHERE user_id = p_winner_id
+  FOR UPDATE;
+
+  INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+  VALUES (p_winner_id, p_amount, 'prize_payout', p_match_id, p_idempotency_key, v_balance + p_amount);
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") RETURNS boolean
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_balance BIGINT;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance
+  FROM ledger_entries
+  WHERE user_id = p_user_id
+  FOR UPDATE;
+
+  IF v_balance < p_amount THEN
+    RETURN FALSE;
+  END IF;
+
+  INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+  VALUES (p_user_id, -p_amount, 'entry_fee', p_match_id, p_idempotency_key, v_balance - p_amount);
+
+  RETURN TRUE;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_tx_id UUID;
+  v_sms RECORD;
+  v_balance BIGINT;
+  v_idempotency_key TEXT;
+  v_existing_status TEXT;
+BEGIN
+  -- 1. Check if this transaction number was already submitted (Idempotency)
+  SELECT status INTO v_existing_status FROM transactions 
+  WHERE reference_code = p_reference_code AND user_id = p_user_id;
+  
+  IF FOUND THEN
+    RETURN v_existing_status;
+  END IF;
+
+  -- 2. Insert the pending transaction
+  INSERT INTO transactions (user_id, type, amount, status, reference_code)
+  VALUES (p_user_id, 'deposit', p_amount, 'pending', p_reference_code)
+  RETURNING id INTO v_tx_id;
+
+  -- 3. Check sms_queue for an already-received SMS matching reference, amount, AND phone
+  SELECT * INTO v_sms FROM sms_queue 
+  WHERE parsed_reference = p_reference_code 
+    AND parsed_amount = p_amount 
+    AND status = 'unmatched'
+    AND RIGHT(parsed_phone, 4) = p_phone_last4
+  LIMIT 1;
+
+  -- 4. If the SMS already arrived, process the deposit instantly!
+  IF FOUND THEN
+    PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
+
+    SELECT COALESCE(SUM(amount), 0) INTO v_balance
+    FROM ledger_entries WHERE user_id = p_user_id;
+
+    v_idempotency_key := 'deposit_' || v_tx_id;
+
+    INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+    VALUES (p_user_id, p_amount, 'deposit', v_tx_id, v_idempotency_key, v_balance + p_amount);
+
+    UPDATE transactions SET status = 'completed', raw_sms = v_sms.raw_sms WHERE id = v_tx_id;
+
+    UPDATE sms_queue SET status = 'matched', matched_transaction_id = v_tx_id WHERE id = v_sms.id;
+
+    RETURN 'completed';
+  ELSE
+    RETURN 'pending';
+  END IF;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") OWNER TO "postgres";
+
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
@@ -290,6 +443,36 @@ CREATE TABLE IF NOT EXISTS "public"."admin_users" (
 ALTER TABLE "public"."admin_users" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."broadcast_logs" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "channel" "text" NOT NULL,
+    "event_type" "text" NOT NULL,
+    "payload" "jsonb",
+    "status" "text",
+    "created_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."broadcast_logs" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."ledger_entries" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "amount" bigint NOT NULL,
+    "type" "text" NOT NULL,
+    "reference_id" "uuid",
+    "idempotency_key" "text" NOT NULL,
+    "balance_after" bigint NOT NULL,
+    "created_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'refund'::"text", 'admin_adjustment'::"text", 'opening_balance'::"text"])))
+);
+
+
+ALTER TABLE "public"."ledger_entries" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."match_players" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "match_id" "uuid",
@@ -302,6 +485,8 @@ CREATE TABLE IF NOT EXISTS "public"."match_players" (
     "survived_ms" integer DEFAULT 0,
     CONSTRAINT "match_players_result_check" CHECK (("result" = ANY (ARRAY['win'::"text", 'lose'::"text", 'disqualified'::"text", 'refunded'::"text"])))
 );
+
+ALTER TABLE ONLY "public"."match_players" REPLICA IDENTITY FULL;
 
 
 ALTER TABLE "public"."match_players" OWNER TO "postgres";
@@ -323,8 +508,22 @@ CREATE TABLE IF NOT EXISTS "public"."matches" (
     CONSTRAINT "matches_status_check" CHECK (("status" = ANY (ARRAY['waiting'::"text", 'live'::"text", 'completed'::"text", 'cancelled'::"text", 'errored'::"text"])))
 );
 
+ALTER TABLE ONLY "public"."matches" REPLICA IDENTITY FULL;
+
 
 ALTER TABLE "public"."matches" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."reconciliation_logs" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "status" "text",
+    "discrepancy_details" "text",
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "reconciliation_logs_status_check" CHECK (("status" = ANY (ARRAY['pass'::"text", 'fail'::"text"])))
+);
+
+
+ALTER TABLE "public"."reconciliation_logs" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."sms_queue" (
@@ -336,6 +535,7 @@ CREATE TABLE IF NOT EXISTS "public"."sms_queue" (
     "matched_transaction_id" "uuid",
     "status" "text" DEFAULT 'unmatched'::"text",
     "admin_note" "text",
+    "parsed_phone" "text",
     CONSTRAINT "sms_queue_status_check" CHECK (("status" = ANY (ARRAY['unmatched'::"text", 'matched'::"text", 'ignored'::"text"])))
 );
 
@@ -366,7 +566,6 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "telegram_id" bigint NOT NULL,
     "username" "text",
-    "real_balance" numeric(12,2) DEFAULT 0,
     "kyc_status" "text" DEFAULT 'pending'::"text",
     "created_at" timestamp with time zone DEFAULT "now"(),
     CONSTRAINT "users_kyc_status_check" CHECK (("kyc_status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text"])))
@@ -391,6 +590,21 @@ ALTER TABLE ONLY "public"."admin_users"
 
 
 
+ALTER TABLE ONLY "public"."broadcast_logs"
+    ADD CONSTRAINT "broadcast_logs_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."ledger_entries"
+    ADD CONSTRAINT "ledger_entries_idempotency_key_key" UNIQUE ("idempotency_key");
+
+
+
+ALTER TABLE ONLY "public"."ledger_entries"
+    ADD CONSTRAINT "ledger_entries_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."match_players"
     ADD CONSTRAINT "match_players_pkey" PRIMARY KEY ("id");
 
@@ -398,6 +612,11 @@ ALTER TABLE ONLY "public"."match_players"
 
 ALTER TABLE ONLY "public"."matches"
     ADD CONSTRAINT "matches_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."reconciliation_logs"
+    ADD CONSTRAINT "reconciliation_logs_pkey" PRIMARY KEY ("id");
 
 
 
@@ -431,12 +650,34 @@ ALTER TABLE ONLY "public"."users"
 
 
 
+CREATE INDEX "idx_ledger_created_at" ON "public"."ledger_entries" USING "btree" ("created_at");
+
+
+
+CREATE INDEX "idx_ledger_user_id" ON "public"."ledger_entries" USING "btree" ("user_id");
+
+
+
 CREATE UNIQUE INDEX "unique_match_payout" ON "public"."transactions" USING "btree" ("match_id", "type") WHERE ("type" = ANY (ARRAY['winnings'::"text", 'platform_fee'::"text"]));
+
+
+
+CREATE OR REPLACE TRIGGER "enforce_nonnegative_balance" AFTER INSERT ON "public"."ledger_entries" FOR EACH ROW EXECUTE FUNCTION "public"."check_balance_nonnegative"();
 
 
 
 ALTER TABLE ONLY "public"."admin_audit_log"
     ADD CONSTRAINT "admin_audit_log_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "public"."users"("id");
+
+
+
+ALTER TABLE ONLY "public"."ledger_entries"
+    ADD CONSTRAINT "ledger_entries_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id");
+
+
+
+ALTER TABLE ONLY "public"."ledger_entries"
+    ADD CONSTRAINT "ledger_entries_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
 
 
 
@@ -533,11 +774,17 @@ CREATE POLICY "Users can insert own transactions" ON "public"."transactions" FOR
 
 
 
+CREATE POLICY "Users can read match players in their matches" ON "public"."match_players" FOR SELECT USING ((EXISTS ( SELECT 1
+   FROM "public"."match_players" "mp"
+  WHERE (("mp"."match_id" = "match_players"."match_id") AND ("mp"."user_id" = "auth"."uid"())))));
+
+
+
 CREATE POLICY "Users can read own data" ON "public"."users" FOR SELECT USING (("auth"."uid"() = "id"));
 
 
 
-CREATE POLICY "Users can read own match players" ON "public"."match_players" FOR SELECT USING (("auth"."uid"() = "user_id"));
+CREATE POLICY "Users can read own ledger" ON "public"."ledger_entries" FOR SELECT USING (("auth"."uid"() = "user_id"));
 
 
 
@@ -556,10 +803,19 @@ CREATE POLICY "Users can update own match players" ON "public"."match_players" F
 ALTER TABLE "public"."admin_users" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."broadcast_logs" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."ledger_entries" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."match_players" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."matches" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."reconciliation_logs" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."sms_queue" ENABLE ROW LEVEL SECURITY;
@@ -761,6 +1017,12 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "anon";
+GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") TO "service_role";
@@ -803,6 +1065,12 @@ GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."get_user_balance"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_user_balance"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_user_balance"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "service_role";
@@ -812,6 +1080,32 @@ GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "anon";
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") TO "service_role";
 
 
 
@@ -848,6 +1142,18 @@ GRANT ALL ON TABLE "public"."admin_users" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."broadcast_logs" TO "anon";
+GRANT ALL ON TABLE "public"."broadcast_logs" TO "authenticated";
+GRANT ALL ON TABLE "public"."broadcast_logs" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."ledger_entries" TO "anon";
+GRANT ALL ON TABLE "public"."ledger_entries" TO "authenticated";
+GRANT ALL ON TABLE "public"."ledger_entries" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."match_players" TO "anon";
 GRANT ALL ON TABLE "public"."match_players" TO "authenticated";
 GRANT ALL ON TABLE "public"."match_players" TO "service_role";
@@ -857,6 +1163,12 @@ GRANT ALL ON TABLE "public"."match_players" TO "service_role";
 GRANT ALL ON TABLE "public"."matches" TO "anon";
 GRANT ALL ON TABLE "public"."matches" TO "authenticated";
 GRANT ALL ON TABLE "public"."matches" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."reconciliation_logs" TO "anon";
+GRANT ALL ON TABLE "public"."reconciliation_logs" TO "authenticated";
+GRANT ALL ON TABLE "public"."reconciliation_logs" TO "service_role";
 
 
 
