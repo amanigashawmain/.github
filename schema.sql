@@ -59,6 +59,63 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
+CREATE OR REPLACE FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_status TEXT;
+  v_frozen BOOLEAN;
+BEGIN
+  -- Idempotency check
+  IF EXISTS (SELECT 1 FROM audit_log WHERE metadata->>'idempotency_key' = p_idempotency_key) THEN
+    RETURN;
+  END IF;
+
+  -- Map action to columns
+  v_status := CASE WHEN p_action = 'suspend' THEN 'suspended' WHEN p_action = 'ban' THEN 'banned' ELSE 'active' END;
+  v_frozen := CASE WHEN p_action = 'freeze_withdrawals' THEN TRUE WHEN p_action = 'unfreeze_withdrawals' THEN FALSE ELSE NULL END;
+
+  -- Update user
+  IF v_frozen IS NOT NULL THEN
+    UPDATE users SET withdrawals_frozen = v_frozen WHERE id = p_user_id;
+  ELSE
+    UPDATE users SET status = v_status WHERE id = p_user_id;
+  END IF;
+
+  -- Log to audit_log
+  INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
+  VALUES (p_admin_id, 'dashboard', p_action, 'users', p_user_id::TEXT, p_reason, json_build_object('idempotency_key', p_idempotency_key));
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_recent_win BIGINT;
+  v_flags TEXT := '';
+BEGIN
+  -- Check for large win in the last 10 minutes
+  SELECT COALESCE(SUM(amount), 0) INTO v_recent_win
+  FROM ledger_entries 
+  WHERE user_id = p_user_id 
+    AND type = 'prize_payout' 
+    AND created_at > now() - interval '10 minutes';
+    
+  IF v_recent_win > 100 THEN
+    v_flags := 'Requested shortly after a large win';
+  END IF;
+
+  RETURN v_flags;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."check_balance_nonnegative"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$ DECLARE current_balance BIGINT;
@@ -350,6 +407,52 @@ END;
 ALTER FUNCTION "public"."get_user_match_history"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_user_profile"("p_identifier" "text") RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_user RECORD;
+  v_balance BIGINT;
+  v_recent_txs JSON;
+  v_recent_matches JSON;
+  v_notes JSON;
+BEGIN
+  -- Find user by UUID or Username
+  SELECT * INTO v_user FROM users WHERE id::TEXT = p_identifier OR username = p_identifier;
+  IF NOT FOUND THEN RETURN json_build_object('error', 'User not found'); END IF;
+
+  -- Balance
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_user.id;
+  
+  -- Recent Transactions
+  SELECT COALESCE(json_agg(json_build_object('type', type, 'amount', amount, 'status', status, 'created_at', created_at) ORDER BY created_at DESC), '[]'::json) 
+  INTO v_recent_txs FROM transactions WHERE user_id = v_user.id LIMIT 10;
+  
+  -- Recent Matches
+  SELECT COALESCE(json_agg(json_build_object('match_id', match_id, 'result', result, 'survived_ms', survived_ms, 'reaction_time_ms', reaction_time_ms) ORDER BY joined_at DESC), '[]'::json) 
+  INTO v_recent_matches FROM match_players WHERE user_id = v_user.id LIMIT 10;
+  
+  -- Admin Notes
+  SELECT COALESCE(json_agg(json_build_object('note', note, 'created_at', created_at) ORDER BY created_at DESC), '[]'::json) 
+  INTO v_notes FROM admin_notes WHERE user_id = v_user.id;
+
+  RETURN json_build_object(
+    'user_id', v_user.id,
+    'username', v_user.username,
+    'telegram_id', v_user.telegram_id,
+    'balance', v_balance,
+    'status', v_user.status,
+    'withdrawals_frozen', v_user.withdrawals_frozen,
+    'recent_txs', v_recent_txs,
+    'recent_matches', v_recent_matches,
+    'notes', v_notes
+  );
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_user_profile"("p_identifier" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."is_admin"() RETURNS boolean
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -417,6 +520,43 @@ END;
 
 
 ALTER FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."notify_new_pending_transaction"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_user_id UUID;
+  v_username TEXT;
+  v_risk TEXT;
+  v_payload JSONB;
+BEGIN
+  IF NEW.status = 'pending' AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.status != 'pending')) THEN
+    SELECT user_id INTO v_user_id FROM transactions WHERE id = NEW.id;
+    SELECT username INTO v_username FROM users WHERE id = v_user_id;
+    v_risk := NEW.risk_flags;
+    
+    v_payload := jsonb_build_object(
+      'tx_id', NEW.id,
+      'type', NEW.type,
+      'amount', NEW.amount,
+      'user_id', v_user_id,
+      'username', v_username,
+      'risk_flags', v_risk
+    );
+    
+    -- REPLACE YOUR_PROJECT_ID HERE:
+    PERFORM net.http_post(
+      url := 'https://gjjfoxcxmpyzmiaiwpyi.supabase.co/functions/v1/admin-notify-transaction',
+      headers := '{"Content-Type": "application/json"}'::jsonb,
+      body := v_payload
+    );
+  END IF;
+  RETURN NEW;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."notify_new_pending_transaction"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") RETURNS "void"
@@ -527,31 +667,27 @@ CREATE OR REPLACE FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_
   v_balance BIGINT;
   v_tx_id UUID;
   v_existing_tx_id UUID;
+  v_risk TEXT;
 BEGIN
-  -- 1. Check Idempotency: if this key was used, return the original transaction ID
   SELECT reference_id INTO v_existing_tx_id FROM ledger_entries WHERE idempotency_key = p_idempotency_key;
   IF FOUND THEN
     RETURN v_existing_tx_id;
   END IF;
 
-  -- 2. Lock the user's ledger rows
   PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = p_user_id;
 
-  -- 3. Compute current balance
-  SELECT COALESCE(SUM(amount), 0) INTO v_balance
-  FROM ledger_entries WHERE user_id = p_user_id;
-
-  -- 4. Check for sufficient funds
   IF v_balance < p_amount THEN
     RAISE EXCEPTION 'Insufficient balance';
   END IF;
 
-  -- 5. Create the pending withdrawal transaction
-  INSERT INTO transactions (user_id, type, amount, status, details)
-  VALUES (p_user_id, 'withdraw', p_amount, 'pending', p_details)
+  -- Calculate risk
+  v_risk := calculate_withdrawal_risk(p_user_id);
+
+  INSERT INTO transactions (user_id, type, amount, status, details, risk_flags)
+  VALUES (p_user_id, 'withdraw', p_amount, 'pending', p_details, v_risk)
   RETURNING id INTO v_tx_id;
 
-  -- 6. Insert the withdrawal_lock ledger entry (deducts immediately)
   INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
   VALUES (p_user_id, -p_amount, 'withdrawal_lock', v_tx_id, p_idempotency_key, v_balance - p_amount);
 
@@ -622,6 +758,18 @@ ALTER FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
+
+
+CREATE TABLE IF NOT EXISTS "public"."admin_notes" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "admin_id" bigint NOT NULL,
+    "note" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."admin_notes" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."admin_users" (
@@ -738,6 +886,24 @@ ALTER TABLE ONLY "public"."matches" REPLICA IDENTITY FULL;
 ALTER TABLE "public"."matches" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."notification_queue" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "chat_id" bigint NOT NULL,
+    "message" "text" NOT NULL,
+    "parse_mode" "text" DEFAULT 'Markdown'::"text",
+    "priority" "text" DEFAULT 'normal'::"text",
+    "status" "text" DEFAULT 'pending'::"text",
+    "attempts" integer DEFAULT 0,
+    "last_attempt_at" timestamp with time zone,
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "notification_queue_priority_check" CHECK (("priority" = ANY (ARRAY['normal'::"text", 'critical'::"text"]))),
+    CONSTRAINT "notification_queue_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'sent'::"text", 'failed'::"text"])))
+);
+
+
+ALTER TABLE "public"."notification_queue" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."reconciliation_logs" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "status" "text",
@@ -790,6 +956,9 @@ CREATE TABLE IF NOT EXISTS "public"."transactions" (
     "raw_sms" "text",
     "created_at" timestamp with time zone DEFAULT "now"(),
     "details" "jsonb",
+    "approved_by_1" bigint,
+    "approved_by_2" bigint,
+    "risk_flags" "text",
     CONSTRAINT "transactions_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'completed'::"text", 'failed'::"text", 'cancelled'::"text"]))),
     CONSTRAINT "transactions_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdraw'::"text", 'entry_fee'::"text", 'winnings'::"text", 'refund'::"text"])))
 );
@@ -804,11 +973,19 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
     "username" "text",
     "kyc_status" "text" DEFAULT 'pending'::"text",
     "created_at" timestamp with time zone DEFAULT "now"(),
-    CONSTRAINT "users_kyc_status_check" CHECK (("kyc_status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text"])))
+    "status" "text" DEFAULT 'active'::"text",
+    "withdrawals_frozen" boolean DEFAULT false,
+    CONSTRAINT "users_kyc_status_check" CHECK (("kyc_status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text"]))),
+    CONSTRAINT "users_status_check" CHECK (("status" = ANY (ARRAY['active'::"text", 'suspended'::"text", 'banned'::"text"])))
 );
 
 
 ALTER TABLE "public"."users" OWNER TO "postgres";
+
+
+ALTER TABLE ONLY "public"."admin_notes"
+    ADD CONSTRAINT "admin_notes_pkey" PRIMARY KEY ("id");
+
 
 
 ALTER TABLE ONLY "public"."admin_users"
@@ -848,6 +1025,11 @@ ALTER TABLE ONLY "public"."match_players"
 
 ALTER TABLE ONLY "public"."matches"
     ADD CONSTRAINT "matches_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."notification_queue"
+    ADD CONSTRAINT "notification_queue_pkey" PRIMARY KEY ("id");
 
 
 
@@ -908,6 +1090,20 @@ CREATE UNIQUE INDEX "unique_match_payout" ON "public"."transactions" USING "btre
 
 
 CREATE OR REPLACE TRIGGER "enforce_nonnegative_balance" AFTER INSERT ON "public"."ledger_entries" FOR EACH ROW EXECUTE FUNCTION "public"."check_balance_nonnegative"();
+
+
+
+CREATE OR REPLACE TRIGGER "trigger_notify_pending_tx" AFTER INSERT OR UPDATE ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."notify_new_pending_transaction"();
+
+
+
+ALTER TABLE ONLY "public"."admin_notes"
+    ADD CONSTRAINT "admin_notes_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "public"."admin_users"("telegram_id");
+
+
+
+ALTER TABLE ONLY "public"."admin_notes"
+    ADD CONSTRAINT "admin_notes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
 
 
 
@@ -1009,11 +1205,19 @@ CREATE POLICY "Authenticated can read matches" ON "public"."matches" FOR SELECT 
 
 
 
+CREATE POLICY "Service role can manage admin_notes" ON "public"."admin_notes" TO "service_role" USING (true);
+
+
+
 CREATE POLICY "Service role can manage admin_users" ON "public"."admin_users" TO "service_role" USING (true);
 
 
 
 CREATE POLICY "Service role can manage audit_log" ON "public"."audit_log" TO "service_role" USING (true);
+
+
+
+CREATE POLICY "Service role can manage notification_queue" ON "public"."notification_queue" TO "service_role" USING (true);
 
 
 
@@ -1061,6 +1265,9 @@ CREATE POLICY "Users can update own data" ON "public"."users" FOR UPDATE USING (
 
 
 
+ALTER TABLE "public"."admin_notes" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."admin_users" ENABLE ROW LEVEL SECURITY;
 
 
@@ -1080,6 +1287,9 @@ ALTER TABLE "public"."match_players" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."matches" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."notification_queue" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."reconciliation_logs" ENABLE ROW LEVEL SECURITY;
@@ -1287,6 +1497,18 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "anon";
 GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "service_role";
@@ -1371,6 +1593,12 @@ GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "anon";
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."is_admin"() TO "service_role";
@@ -1380,6 +1608,12 @@ GRANT ALL ON FUNCTION "public"."is_admin"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."notify_new_pending_transaction"() TO "anon";
+GRANT ALL ON FUNCTION "public"."notify_new_pending_transaction"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."notify_new_pending_transaction"() TO "service_role";
 
 
 
@@ -1442,6 +1676,12 @@ GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p
 
 
 
+GRANT ALL ON TABLE "public"."admin_notes" TO "anon";
+GRANT ALL ON TABLE "public"."admin_notes" TO "authenticated";
+GRANT ALL ON TABLE "public"."admin_notes" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."admin_users" TO "anon";
 GRANT ALL ON TABLE "public"."admin_users" TO "authenticated";
 GRANT ALL ON TABLE "public"."admin_users" TO "service_role";
@@ -1481,6 +1721,12 @@ GRANT ALL ON TABLE "public"."match_players" TO "service_role";
 GRANT ALL ON TABLE "public"."matches" TO "anon";
 GRANT ALL ON TABLE "public"."matches" TO "authenticated";
 GRANT ALL ON TABLE "public"."matches" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."notification_queue" TO "anon";
+GRANT ALL ON TABLE "public"."notification_queue" TO "authenticated";
+GRANT ALL ON TABLE "public"."notification_queue" TO "service_role";
 
 
 
