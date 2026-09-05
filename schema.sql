@@ -330,6 +330,45 @@ END;
 ALTER FUNCTION "public"."get_revenue_stats"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_match RECORD;
+  v_players JSON;
+BEGIN
+  SELECT * INTO v_match FROM matches WHERE id = p_match_id;
+  IF NOT FOUND THEN RETURN json_build_object('error', 'Match not found'); END IF;
+
+  SELECT COALESCE(json_agg(json_build_object(
+    'user_id', mp.user_id,
+    'username', u.username,
+    'result', mp.result,
+    'reaction_time_ms', mp.reaction_time_ms,
+    'survived_ms', mp.survived_ms,
+    'flag_status', mp.flag_status,
+    'flag_reason', mp.flag_reason,
+    'joined_at', mp.joined_at
+  ) ORDER BY 
+    CASE WHEN mp.result = 'win' THEN 0 ELSE 1 END,
+    mp.reaction_time_ms ASC NULLS LAST,
+    mp.survived_ms DESC NULLS LAST
+  ), '[]'::json) 
+  INTO v_players 
+  FROM match_players mp
+  JOIN users u ON u.id = mp.user_id
+  WHERE mp.match_id = p_match_id;
+
+  RETURN json_build_object(
+    'match', row_to_json(v_match),
+    'players', v_players
+  );
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_user_active_matches"() RETURNS TABLE("match_id" "uuid", "game_type" "text", "scheduled_start" timestamp with time zone, "status" "text")
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -559,15 +598,46 @@ END;
 ALTER FUNCTION "public"."notify_new_pending_transaction"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") RETURNS "void"
+CREATE OR REPLACE FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_match_id UUID;
+  v_user_id UUID;
+BEGIN
+  IF EXISTS (SELECT 1 FROM audit_log WHERE metadata->>'idempotency_key' = p_idempotency_key) THEN
+    RETURN;
+  END IF;
+
+  SELECT match_id, user_id INTO v_match_id, v_user_id FROM match_players WHERE id = p_match_player_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Match player not found'; END IF;
+
+  -- Update the player's result
+  UPDATE match_players 
+  SET result = p_new_result, flag_status = 'overridden', flag_reason = p_reason
+  WHERE id = p_match_player_id;
+
+  -- If overriding to a win, we might need to process payout (simplified for now: just log it)
+  -- In a real system, you'd reverse the old winner's payout and pay the new one.
+
+  -- Log to audit_log
+  INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
+  VALUES (p_admin_id, 'dashboard', 'override_anticheat', 'match_players', p_match_player_id::TEXT, p_reason, json_build_object('idempotency_key', p_idempotency_key, 'new_result', p_new_result));
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
   v_balance BIGINT;
 BEGIN
-  -- CRITICAL FIX: Lock the user's ledger rows first
+  -- Lock the user's ledger rows first
   PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
 
-  -- Then compute the sum safely
+  -- Then compute the sum
   SELECT COALESCE(SUM(amount), 0) INTO v_balance
   FROM ledger_entries WHERE user_id = p_user_id;
 
@@ -577,7 +647,7 @@ END;
  $$;
 
 
-ALTER FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") OWNER TO "postgres";
+ALTER FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") RETURNS "void"
@@ -836,7 +906,7 @@ CREATE TABLE IF NOT EXISTS "public"."ledger_entries" (
     "reference_id" "uuid",
     "idempotency_key" "text" NOT NULL,
     "balance_after" bigint NOT NULL,
-    "created_by" "uuid",
+    "created_by" bigint,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'refund'::"text", 'admin_adjustment'::"text", 'opening_balance'::"text"])))
 );
@@ -855,6 +925,9 @@ CREATE TABLE IF NOT EXISTS "public"."match_players" (
     "disqualified_at" timestamp with time zone,
     "disqualify_reason" "text",
     "survived_ms" integer DEFAULT 0,
+    "flag_status" "text" DEFAULT 'none'::"text",
+    "flag_reason" "text",
+    CONSTRAINT "match_players_flag_status_check" CHECK (("flag_status" = ANY (ARRAY['none'::"text", 'flagged'::"text", 'confirmed'::"text", 'overridden'::"text"]))),
     CONSTRAINT "match_players_result_check" CHECK (("result" = ANY (ARRAY['win'::"text", 'lose'::"text", 'disqualified'::"text", 'refunded'::"text"])))
 );
 
@@ -896,6 +969,7 @@ CREATE TABLE IF NOT EXISTS "public"."notification_queue" (
     "attempts" integer DEFAULT 0,
     "last_attempt_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"(),
+    "reply_markup" "jsonb",
     CONSTRAINT "notification_queue_priority_check" CHECK (("priority" = ANY (ARRAY['normal'::"text", 'critical'::"text"]))),
     CONSTRAINT "notification_queue_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'sent'::"text", 'failed'::"text"])))
 );
@@ -1123,7 +1197,7 @@ ALTER TABLE ONLY "public"."contact_messages"
 
 
 ALTER TABLE ONLY "public"."ledger_entries"
-    ADD CONSTRAINT "ledger_entries_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id");
+    ADD CONSTRAINT "ledger_entries_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."admin_users"("telegram_id") ON DELETE SET NULL;
 
 
 
@@ -1569,6 +1643,12 @@ GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "service_role";
@@ -1617,10 +1697,15 @@ GRANT ALL ON FUNCTION "public"."notify_new_pending_transaction"() TO "service_ro
 
 
 
-REVOKE ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" "uuid") TO "service_role";
+GRANT ALL ON FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) TO "anon";
+GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) TO "service_role";
 
 
 
