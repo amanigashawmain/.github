@@ -521,37 +521,44 @@ CREATE OR REPLACE FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_
     AS $$ DECLARE
   v_balance BIGINT;
   v_exists BOOLEAN;
+  v_match_status TEXT;
 BEGIN
-  -- 1. Idempotency Check: If this key exists, you already paid and joined. Return true safely.
+  -- 1. CRITICAL FIX: Check Match Status (Prevent joining after it starts)
+  SELECT status INTO v_match_status FROM matches WHERE id = p_match_id;
+  IF v_match_status IS NULL OR v_match_status != 'waiting' THEN
+    RETURN FALSE;
+  END IF;
+
+  -- 2. Idempotency Check
   SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
   IF v_exists THEN
-    -- Ensure they are in match_players just in case the previous call failed midway
-    INSERT INTO match_players (match_id, user_id)
-    VALUES (p_match_id, p_user_id)
-    ON CONFLICT (match_id, user_id) DO NOTHING;
     RETURN TRUE;
   END IF;
 
-  -- 2. Lock the user's ledger rows to serialize concurrent requests
+  -- 3. Lock the user's ledger rows
   PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
 
-  -- 3. Compute current balance
+  -- 4. Compute current balance
   SELECT COALESCE(SUM(amount), 0) INTO v_balance
   FROM ledger_entries WHERE user_id = p_user_id;
 
-  -- 4. Validate sufficient funds
+  -- 5. Validate sufficient funds
   IF v_balance < p_amount THEN
     RETURN FALSE;
   END IF;
 
-  -- 5. Deduct balance (Insert ledger entry)
+  -- 6. Deduct balance (Insert ledger entry)
   INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
   VALUES (p_user_id, -p_amount, 'entry_fee', p_match_id, p_idempotency_key, v_balance - p_amount);
 
-  -- 6. Insert into match_players
+  -- 7. Insert into match_players
   INSERT INTO match_players (match_id, user_id)
   VALUES (p_match_id, p_user_id)
   ON CONFLICT (match_id, user_id) DO NOTHING;
+
+  -- 8. CRITICAL FIX: Insert into transactions table so the Wallet UI shows it
+  INSERT INTO transactions (user_id, match_id, type, amount, status)
+  VALUES (p_user_id, p_match_id, 'entry_fee', p_amount, 'completed');
 
   RETURN TRUE;
 END;
@@ -650,43 +657,36 @@ END;
 ALTER FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") RETURNS "void"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
-  v_balance BIGINT;
-BEGIN
-  SELECT COALESCE(SUM(amount), 0) INTO v_balance
-  FROM ledger_entries
-  WHERE user_id = p_winner_id
-  FOR UPDATE;
-
-  INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
-  VALUES (p_winner_id, p_amount, 'prize_payout', p_match_id, p_idempotency_key, v_balance + p_amount);
-END;
- $$;
-
-
-ALTER FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
   v_balance BIGINT;
   v_house_id UUID;
+  v_exists BOOLEAN;
 BEGIN
+  -- 1. Idempotency Check: If this payout already happened, do nothing and return safely
+  SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
+  IF v_exists THEN RETURN; END IF;
+
+  -- Find the House Account
   SELECT id INTO v_house_id FROM users WHERE telegram_id = 0;
 
-  -- 1. Credit Winner
-  SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = p_winner_id FOR UPDATE;
+  -- 2. Credit Winner
+  PERFORM 1 FROM ledger_entries WHERE user_id = p_winner_id FOR UPDATE;
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = p_winner_id;
+  
   INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
-  VALUES (p_winner_id, p_amount, 'prize_payout', p_match_id, p_idempotency_key, v_balance + p_amount);
+  VALUES (p_winner_id, p_amount, 'prize_payout', p_match_id, p_idempotency_key, v_balance + p_amount)
+  ON CONFLICT (idempotency_key) DO NOTHING;
 
-  -- 2. Credit House Account (Platform Fee)
-  IF p_platform_fee > 0 THEN
-    SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_house_id FOR UPDATE;
+  -- 3. Credit House Account (Platform Fee)
+  IF p_platform_fee > 0 AND v_house_id IS NOT NULL THEN
+    PERFORM 1 FROM ledger_entries WHERE user_id = v_house_id FOR UPDATE;
+    SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_house_id;
+    
     INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
-    VALUES (v_house_id, p_platform_fee, 'platform_fee', p_match_id, 'fee_' || p_idempotency_key, v_balance + p_platform_fee);
+    VALUES (v_house_id, p_platform_fee, 'platform_fee', p_match_id, 'fee_' || p_idempotency_key, v_balance + p_platform_fee)
+    ON CONFLICT (idempotency_key) DO NOTHING;
   END IF;
 END;
  $$;
@@ -729,6 +729,37 @@ END;
 
 
 ALTER FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_balance BIGINT;
+  v_exists BOOLEAN;
+BEGIN
+  -- 1. Idempotency Check: If we already refunded this, do nothing
+  SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
+  IF v_exists THEN RETURN; END IF;
+
+  -- 2. Lock the user's ledger rows
+  PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
+
+  -- 3. Compute current balance
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance
+  FROM ledger_entries WHERE user_id = p_user_id;
+
+  -- 4. Insert refund ledger entry (positive amount)
+  INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+  VALUES (p_user_id, 50, 'refund', p_match_id, p_idempotency_key, v_balance + 50);
+
+  -- 5. Insert into transactions table so the Wallet UI shows it
+  INSERT INTO transactions (user_id, match_id, type, amount, status)
+  VALUES (p_user_id, p_match_id, 'refund', 50, 'completed');
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") RETURNS "uuid"
@@ -1709,13 +1740,6 @@ GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" 
 
 
 
-REVOKE ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_idempotency_key" "text") TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") TO "service_role";
@@ -1725,6 +1749,12 @@ GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount"
 GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "service_role";
 
 
 
