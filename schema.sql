@@ -59,6 +59,18 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
+CREATE OR REPLACE FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ BEGIN
+  INSERT INTO admin_notes (user_id, admin_id, note)
+  VALUES (p_user_id, p_admin_id, p_note);
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -89,6 +101,39 @@ END;
 
 
 ALTER FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_deposits BIGINT;
+  v_withdrawals BIGINT;
+  v_entry_fees BIGINT;
+  v_payouts BIGINT;
+  v_refunds BIGINT;
+  v_calculated_balance BIGINT;
+BEGIN
+  SELECT COALESCE(SUM(amount), 0) INTO v_deposits FROM ledger_entries WHERE user_id = p_user_id AND type = 'deposit';
+  SELECT COALESCE(SUM(ABS(amount)), 0) INTO v_withdrawals FROM ledger_entries WHERE user_id = p_user_id AND type IN ('withdrawal_lock', 'withdrawal_complete');
+  SELECT COALESCE(SUM(ABS(amount)), 0) INTO v_entry_fees FROM ledger_entries WHERE user_id = p_user_id AND type = 'entry_fee';
+  SELECT COALESCE(SUM(amount), 0) INTO v_payouts FROM ledger_entries WHERE user_id = p_user_id AND type = 'prize_payout';
+  SELECT COALESCE(SUM(amount), 0) INTO v_refunds FROM ledger_entries WHERE user_id = p_user_id AND type = 'refund';
+  
+  v_calculated_balance := v_deposits - v_withdrawals - v_entry_fees + v_payouts + v_refunds;
+  
+  RETURN json_build_object(
+    'deposits', v_deposits,
+    'withdrawals', v_withdrawals,
+    'entry_fees', v_entry_fees,
+    'payouts', v_payouts,
+    'refunds', v_refunds,
+    'calculated_balance', v_calculated_balance
+  );
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") RETURNS "text"
@@ -330,6 +375,17 @@ END;
 ALTER FUNCTION "public"."get_revenue_stats"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_server_time"() RETURNS "text"
+    LANGUAGE "plpgsql"
+    AS $$ BEGIN
+  RETURN now()::timestamptz::text;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_server_time"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -516,23 +572,23 @@ END;
 ALTER FUNCTION "public"."is_admin"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") RETURNS boolean
+CREATE OR REPLACE FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") RETURNS "text"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
   v_balance BIGINT;
   v_exists BOOLEAN;
   v_match_status TEXT;
 BEGIN
-  -- 1. CRITICAL FIX: Check Match Status (Prevent joining after it starts)
+  -- 1. Check Match Status (Prevent joining after it starts)
   SELECT status INTO v_match_status FROM matches WHERE id = p_match_id;
   IF v_match_status IS NULL OR v_match_status != 'waiting' THEN
-    RETURN FALSE;
+    RETURN 'match_closed';
   END IF;
 
   -- 2. Idempotency Check
   SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
   IF v_exists THEN
-    RETURN TRUE;
+    RETURN 'already_joined';
   END IF;
 
   -- 3. Lock the user's ledger rows
@@ -544,10 +600,10 @@ BEGIN
 
   -- 5. Validate sufficient funds
   IF v_balance < p_amount THEN
-    RETURN FALSE;
+    RETURN 'insufficient_balance';
   END IF;
 
-  -- 6. Deduct balance (Insert ledger entry)
+  -- 6. Deduct balance
   INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
   VALUES (p_user_id, -p_amount, 'entry_fee', p_match_id, p_idempotency_key, v_balance - p_amount);
 
@@ -556,11 +612,11 @@ BEGIN
   VALUES (p_match_id, p_user_id)
   ON CONFLICT (match_id, user_id) DO NOTHING;
 
-  -- 8. CRITICAL FIX: Insert into transactions table so the Wallet UI shows it
+  -- 8. Insert into transactions table so Wallet UI shows it
   INSERT INTO transactions (user_id, match_id, type, amount, status)
   VALUES (p_user_id, p_match_id, 'entry_fee', p_amount, 'completed');
 
-  RETURN TRUE;
+  RETURN 'success';
 END;
  $$;
 
@@ -664,7 +720,7 @@ CREATE OR REPLACE FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_am
   v_house_id UUID;
   v_exists BOOLEAN;
 BEGIN
-  -- 1. Idempotency Check: If this payout already happened, do nothing and return safely
+  -- 1. Idempotency Check
   SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
   IF v_exists THEN RETURN; END IF;
 
@@ -760,6 +816,42 @@ END;
 
 
 ALTER FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."refund_match"("p_match_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_player RECORD;
+  v_balance BIGINT;
+  v_idempotency_key TEXT;
+BEGIN
+  -- Loop through all players who joined this match
+  FOR v_player IN SELECT user_id FROM match_players WHERE match_id = p_match_id LOOP
+    -- Create a unique idempotency key for this refund
+    v_idempotency_key := 'refund_' || p_match_id || '_' || v_player.user_id;
+    
+    -- Check if we already refunded this player for this match
+    IF NOT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = v_idempotency_key) THEN
+      -- Lock the user's ledger rows
+      PERFORM 1 FROM ledger_entries WHERE user_id = v_player.user_id FOR UPDATE;
+      
+      -- Compute current balance
+      SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_player.user_id;
+      
+      -- Insert refund ledger entry (positive 50Q)
+      INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+      VALUES (v_player.user_id, 50, 'refund', p_match_id, v_idempotency_key, v_balance + 50);
+      
+      -- Insert into transactions table so Wallet UI shows it
+      INSERT INTO transactions (user_id, match_id, type, amount, status)
+      VALUES (v_player.user_id, p_match_id, 'refund', 50, 'completed');
+    END IF;
+  END LOOP;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."refund_match"("p_match_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") RETURNS "uuid"
@@ -939,7 +1031,7 @@ CREATE TABLE IF NOT EXISTS "public"."ledger_entries" (
     "balance_after" bigint NOT NULL,
     "created_by" bigint,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'refund'::"text", 'admin_adjustment'::"text", 'opening_balance'::"text"])))
+    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'platform_fee'::"text", 'refund'::"text", 'admin_adjustment'::"text", 'opening_balance'::"text"])))
 );
 
 
@@ -980,6 +1072,7 @@ CREATE TABLE IF NOT EXISTS "public"."matches" (
     "seed_hash" "text",
     "revealed_seed_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"(),
+    "go_green_ms" integer,
     CONSTRAINT "matches_game_type_check" CHECK (("game_type" = ANY (ARRAY['reaction_tap'::"text", 'holdout'::"text"]))),
     CONSTRAINT "matches_status_check" CHECK (("status" = ANY (ARRAY['waiting'::"text", 'live'::"text", 'completed'::"text", 'cancelled'::"text", 'errored'::"text"])))
 );
@@ -1065,7 +1158,7 @@ CREATE TABLE IF NOT EXISTS "public"."transactions" (
     "approved_by_2" bigint,
     "risk_flags" "text",
     CONSTRAINT "transactions_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'completed'::"text", 'failed'::"text", 'cancelled'::"text"]))),
-    CONSTRAINT "transactions_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdraw'::"text", 'entry_fee'::"text", 'winnings'::"text", 'refund'::"text"])))
+    CONSTRAINT "transactions_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdraw'::"text", 'entry_fee'::"text", 'winnings'::"text", 'refund'::"text", 'platform_fee'::"text"])))
 );
 
 
@@ -1310,7 +1403,7 @@ CREATE POLICY "Authenticated can read matches" ON "public"."matches" FOR SELECT 
 
 
 
-CREATE POLICY "Service role can manage admin_notes" ON "public"."admin_notes" TO "service_role" USING (true);
+CREATE POLICY "Service role can manage admin_notes" ON "public"."admin_notes" TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -1602,9 +1695,21 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") TO "service_role";
 
 
 
@@ -1671,6 +1776,12 @@ GRANT ALL ON FUNCTION "public"."get_next_match"("p_game_type" "text") TO "servic
 GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_server_time"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_server_time"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_server_time"() TO "service_role";
 
 
 
@@ -1755,6 +1866,12 @@ GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p
 GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") TO "service_role";
 
 
 
