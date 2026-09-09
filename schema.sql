@@ -288,6 +288,35 @@ END;
 ALTER FUNCTION "public"."get_admin_dashboard_stats"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_all_inquiries"() RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_inquiries JSON;
+BEGIN
+  SELECT COALESCE(json_agg(json_build_object(
+    'id', cm.id,
+    'message', cm.message,
+    'status', cm.status,
+    'assigned_to', cm.assigned_to,
+    'created_at', cm.created_at,
+    'user_id', cm.user_id,
+    'username', u.username
+  ) ORDER BY 
+    CASE WHEN cm.status = 'open' THEN 0 ELSE 1 END, 
+    cm.created_at DESC
+  ), '[]'::json) 
+  INTO v_inquiries 
+  FROM contact_messages cm
+  JOIN users u ON u.id = cm.user_id;
+
+  RETURN v_inquiries;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_all_inquiries"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_latest_reconciliation"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -308,6 +337,29 @@ END;
 
 
 ALTER FUNCTION "public"."get_latest_reconciliation"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_lockdown_history"() RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_history JSON;
+BEGIN
+  SELECT COALESCE(json_agg(json_build_object(
+    'id', id,
+    'action', action,
+    'admin_id', admin_id,
+    'reason', reason,
+    'created_at', created_at
+  ) ORDER BY created_at DESC), '[]'::json) 
+  INTO v_history 
+  FROM lockdown_history;
+  
+  RETURN v_history;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_lockdown_history"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_match_players"("p_match_id" "uuid") RETURNS "jsonb"
@@ -892,6 +944,50 @@ END;
 ALTER FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_current_status TEXT;
+  v_interface TEXT;
+BEGIN
+  -- Determine interface based on admin_id range (bot is direct TG ID, dashboard passes TG ID too)
+  v_interface := 'bot'; -- Defaulting to bot for simplicity, can be 'dashboard' if called from Edge Function context
+  
+  SELECT status INTO v_current_status FROM system_settings WHERE id = 1;
+  IF NOT FOUND THEN RAISE EXCEPTION 'System settings not found'; END IF;
+
+  IF p_action = 'activate' THEN
+    IF v_current_status = 'locked_down' THEN
+      RAISE EXCEPTION 'App is already locked down.';
+    END IF;
+    UPDATE system_settings 
+    SET status = 'locked_down', lockdown_reason = p_reason, updated_at = now(), activated_by = p_admin_id, activated_at = now() 
+    WHERE id = 1;
+    
+    INSERT INTO lockdown_history (action, admin_id, reason) VALUES ('activate', p_admin_id, p_reason);
+  ELSIF p_action = 'lift' THEN
+    IF v_current_status = 'operational' THEN
+      RAISE EXCEPTION 'App is already operational.';
+    END IF;
+    UPDATE system_settings 
+    SET status = 'operational', lockdown_reason = NULL, updated_at = now(), activated_by = NULL, activated_at = NULL 
+    WHERE id = 1;
+    
+    INSERT INTO lockdown_history (action, admin_id, reason) VALUES ('lift', p_admin_id, p_reason);
+  ELSE
+    RAISE EXCEPTION 'Invalid action. Use activate or lift.';
+  END IF;
+
+  -- Log to audit_log
+  INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
+  VALUES (p_admin_id, v_interface, 'lockdown_' || p_action, 'system_settings', '1', p_reason, json_build_object());
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") RETURNS "text"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -947,6 +1043,45 @@ END;
 
 
 ALTER FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_current_status TEXT;
+  v_idempotency_key TEXT;
+BEGIN
+  v_idempotency_key := 'inquiry_' || p_inquiry_id || '_' || p_admin_id;
+  
+  -- Idempotency check
+  IF EXISTS (SELECT 1 FROM audit_log WHERE metadata->>'idempotency_key' = v_idempotency_key) THEN
+    RETURN;
+  END IF;
+
+  SELECT status INTO v_current_status FROM contact_messages WHERE id = p_inquiry_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Inquiry not found'; END IF;
+
+  -- Update inquiry
+  UPDATE contact_messages 
+  SET status = p_new_status, assigned_to = p_admin_id 
+  WHERE id = p_inquiry_id;
+
+  -- Log to audit_log (using standard || concatenation)
+  INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
+  VALUES (
+    p_admin_id, 
+    'dashboard', 
+    'update_inquiry', 
+    'contact_messages', 
+    p_inquiry_id::TEXT, 
+    'Status changed from ' || v_current_status || ' to ' || p_new_status, 
+    json_build_object('idempotency_key', v_idempotency_key, 'new_status', p_new_status)
+  );
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") OWNER TO "postgres";
 
 SET default_tablespace = '';
 
@@ -1014,6 +1149,7 @@ CREATE TABLE IF NOT EXISTS "public"."contact_messages" (
     "message" "text" NOT NULL,
     "status" "text" DEFAULT 'open'::"text",
     "created_at" timestamp with time zone DEFAULT "now"(),
+    "assigned_to" bigint,
     CONSTRAINT "contact_messages_status_check" CHECK (("status" = ANY (ARRAY['open'::"text", 'resolved'::"text"])))
 );
 
@@ -1036,6 +1172,19 @@ CREATE TABLE IF NOT EXISTS "public"."ledger_entries" (
 
 
 ALTER TABLE "public"."ledger_entries" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."lockdown_history" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "action" "text" NOT NULL,
+    "admin_id" bigint NOT NULL,
+    "reason" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "lockdown_history_action_check" CHECK (("action" = ANY (ARRAY['activate'::"text", 'lift'::"text"])))
+);
+
+
+ALTER TABLE "public"."lockdown_history" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."match_players" (
@@ -1136,8 +1285,12 @@ CREATE TABLE IF NOT EXISTS "public"."system_settings" (
     "status" "text" DEFAULT 'operational'::"text" NOT NULL,
     "lockdown_reason" "text",
     "updated_at" timestamp with time zone DEFAULT "now"(),
+    "activated_by" bigint,
+    "activated_at" timestamp with time zone,
     CONSTRAINT "system_settings_status_check" CHECK (("status" = ANY (ARRAY['operational'::"text", 'locked_down'::"text"])))
 );
+
+ALTER TABLE ONLY "public"."system_settings" REPLICA IDENTITY FULL;
 
 
 ALTER TABLE "public"."system_settings" OWNER TO "postgres";
@@ -1213,6 +1366,11 @@ ALTER TABLE ONLY "public"."ledger_entries"
 
 ALTER TABLE ONLY "public"."ledger_entries"
     ADD CONSTRAINT "ledger_entries_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."lockdown_history"
+    ADD CONSTRAINT "lockdown_history_pkey" PRIMARY KEY ("id");
 
 
 
@@ -1316,6 +1474,11 @@ ALTER TABLE ONLY "public"."audit_log"
 
 
 ALTER TABLE ONLY "public"."contact_messages"
+    ADD CONSTRAINT "contact_messages_assigned_to_fkey" FOREIGN KEY ("assigned_to") REFERENCES "public"."admin_users"("telegram_id");
+
+
+
+ALTER TABLE ONLY "public"."contact_messages"
     ADD CONSTRAINT "contact_messages_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
 
 
@@ -1327,6 +1490,11 @@ ALTER TABLE ONLY "public"."ledger_entries"
 
 ALTER TABLE ONLY "public"."ledger_entries"
     ADD CONSTRAINT "ledger_entries_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
+
+
+
+ALTER TABLE ONLY "public"."lockdown_history"
+    ADD CONSTRAINT "lockdown_history_admin_id_fkey" FOREIGN KEY ("admin_id") REFERENCES "public"."admin_users"("telegram_id");
 
 
 
@@ -1415,6 +1583,14 @@ CREATE POLICY "Service role can manage audit_log" ON "public"."audit_log" TO "se
 
 
 
+CREATE POLICY "Service role can manage contact_messages" ON "public"."contact_messages" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
+CREATE POLICY "Service role can manage lockdown_history" ON "public"."lockdown_history" TO "service_role" USING (true) WITH CHECK (true);
+
+
+
 CREATE POLICY "Service role can manage notification_queue" ON "public"."notification_queue" TO "service_role" USING (true);
 
 
@@ -1479,6 +1655,9 @@ ALTER TABLE "public"."contact_messages" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."ledger_entries" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."lockdown_history" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."match_players" ENABLE ROW LEVEL SECURITY;
@@ -1755,9 +1934,21 @@ GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_lockdown_history"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_lockdown_history"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_lockdown_history"() TO "service_role";
 
 
 
@@ -1881,9 +2072,21 @@ GRANT ALL ON FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amoun
 
 
 
+GRANT ALL ON FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") TO "service_role";
 
 
 
@@ -1941,6 +2144,12 @@ GRANT ALL ON TABLE "public"."contact_messages" TO "service_role";
 GRANT ALL ON TABLE "public"."ledger_entries" TO "anon";
 GRANT ALL ON TABLE "public"."ledger_entries" TO "authenticated";
 GRANT ALL ON TABLE "public"."ledger_entries" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."lockdown_history" TO "anon";
+GRANT ALL ON TABLE "public"."lockdown_history" TO "authenticated";
+GRANT ALL ON TABLE "public"."lockdown_history" TO "service_role";
 
 
 
