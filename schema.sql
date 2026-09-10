@@ -317,6 +317,36 @@ END;
 ALTER FUNCTION "public"."get_all_inquiries"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_audit_logs"("p_limit" integer DEFAULT 100) RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_logs JSON;
+BEGIN
+  SELECT COALESCE(json_agg(json_build_object(
+    'id', al.id,
+    'admin_id', al.admin_id,
+    'admin_username', au.role, -- Admins don't have a username in admin_users, so we use role or ID
+    'interface', al.interface,
+    'action_type', al.action_type,
+    'target_type', al.target_type,
+    'target_id', al.target_id,
+    'reason', al.reason,
+    'metadata', al.metadata,
+    'created_at', al.created_at
+  ) ORDER BY al.created_at DESC), '[]'::json) 
+  INTO v_logs 
+  FROM audit_log al
+  LEFT JOIN admin_users au ON au.telegram_id = al.admin_id
+  LIMIT p_limit;
+
+  RETURN v_logs;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_audit_logs"("p_limit" integer) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_latest_reconciliation"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -436,6 +466,50 @@ END;
 
 
 ALTER FUNCTION "public"."get_server_time"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_system_health"() RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_broadcasts JSON;
+  v_recon JSON;
+  v_sessions JSON;
+BEGIN
+  -- 1. Realtime Broadcast Stats (Last 24 hours)
+  SELECT json_build_object(
+    'total', COUNT(*),
+    'sent', COUNT(*) FILTER (WHERE status = 'sent')
+  ) INTO v_broadcasts 
+  FROM broadcast_logs 
+  WHERE created_at > now() - interval '24 hours';
+
+  -- 2. Reconciliation History (Last 10 runs)
+  SELECT COALESCE(json_agg(json_build_object(
+    'status', status, 
+    'details', discrepancy_details, 
+    'created_at', created_at
+  ) ORDER BY created_at DESC), '[]'::json) INTO v_recon
+  FROM reconciliation_logs LIMIT 10;
+
+  -- 3. Admin Session/Interaction Log (Last 20 actions)
+  SELECT COALESCE(json_agg(json_build_object(
+    'admin_id', admin_id, 
+    'interface', interface, 
+    'action', action_type, 
+    'time', created_at
+  ) ORDER BY created_at DESC), '[]'::json) INTO v_sessions
+  FROM audit_log LIMIT 20;
+
+  RETURN json_build_object(
+    'broadcasts', v_broadcasts,
+    'reconciliation', v_recon,
+    'sessions', v_sessions
+  );
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_system_health"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") RETURNS json
@@ -1940,6 +2014,12 @@ GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "service_role";
@@ -1973,6 +2053,12 @@ GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_server_time"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_server_time"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_server_time"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_system_health"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_system_health"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_system_health"() TO "service_role";
 
 
 
