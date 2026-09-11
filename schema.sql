@@ -704,41 +704,58 @@ CREATE OR REPLACE FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_
   v_balance BIGINT;
   v_exists BOOLEAN;
   v_match_status TEXT;
+  v_pool_size INT;
+  v_current_players INT;
+  v_already_in_match BOOLEAN;
 BEGIN
-  -- 1. Check Match Status (Prevent joining after it starts)
-  SELECT status INTO v_match_status FROM matches WHERE id = p_match_id;
+  -- 1. Lock the match row & fetch details
+  SELECT status, pool_size INTO v_match_status, v_pool_size 
+  FROM matches WHERE id = p_match_id FOR UPDATE;
+  
   IF v_match_status IS NULL OR v_match_status != 'waiting' THEN
     RETURN 'match_closed';
   END IF;
 
-  -- 2. Idempotency Check
+  -- 2. Idempotency Check (Same key used)
   SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
   IF v_exists THEN
     RETURN 'already_joined';
   END IF;
 
-  -- 3. Lock the user's ledger rows
+  -- 3. Check if user is already in this match
+  SELECT EXISTS (SELECT 1 FROM match_players WHERE match_id = p_match_id AND user_id = p_user_id) INTO v_already_in_match;
+  IF v_already_in_match THEN
+    RETURN 'already_joined';
+  END IF;
+
+  -- 4. CRITICAL FIX: Check if match is full
+  SELECT COUNT(*) INTO v_current_players FROM match_players WHERE match_id = p_match_id;
+  IF v_current_players >= v_pool_size THEN
+    RETURN 'match_full';
+  END IF;
+
+  -- 5. Lock the user's ledger rows
   PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
 
-  -- 4. Compute current balance
+  -- 6. Compute current balance
   SELECT COALESCE(SUM(amount), 0) INTO v_balance
   FROM ledger_entries WHERE user_id = p_user_id;
 
-  -- 5. Validate sufficient funds
+  -- 7. Validate sufficient funds
   IF v_balance < p_amount THEN
     RETURN 'insufficient_balance';
   END IF;
 
-  -- 6. Deduct balance
+  -- 8. Deduct balance
   INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
   VALUES (p_user_id, -p_amount, 'entry_fee', p_match_id, p_idempotency_key, v_balance - p_amount);
 
-  -- 7. Insert into match_players
+  -- 9. Insert into match_players
   INSERT INTO match_players (match_id, user_id)
   VALUES (p_match_id, p_user_id)
   ON CONFLICT (match_id, user_id) DO NOTHING;
 
-  -- 8. Insert into transactions table so Wallet UI shows it
+  -- 10. Insert into transactions table so Wallet UI shows it
   INSERT INTO transactions (user_id, match_id, type, amount, status)
   VALUES (p_user_id, p_match_id, 'entry_fee', p_amount, 'completed');
 
@@ -758,7 +775,10 @@ CREATE OR REPLACE FUNCTION "public"."notify_new_pending_transaction"() RETURNS "
   v_risk TEXT;
   v_payload JSONB;
 BEGIN
-  IF NEW.status = 'pending' AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.status != 'pending')) THEN
+  -- CRITICAL FIX: Only send admin bot notifications for WITHDRAWALS.
+  -- Deposits are auto-matched silently. Unmatched deposits go to the SMS Queue for dashboard review.
+  IF NEW.status = 'pending' AND NEW.type = 'withdraw' AND (TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.status != 'pending')) THEN
+    
     SELECT user_id INTO v_user_id FROM transactions WHERE id = NEW.id;
     SELECT username INTO v_username FROM users WHERE id = v_user_id;
     v_risk := NEW.risk_flags;
@@ -772,13 +792,13 @@ BEGIN
       'risk_flags', v_risk
     );
     
-    -- REPLACE YOUR_PROJECT_ID HERE:
     PERFORM net.http_post(
       url := 'https://gjjfoxcxmpyzmiaiwpyi.supabase.co/functions/v1/admin-notify-transaction',
       headers := '{"Content-Type": "application/json"}'::jsonb,
       body := v_payload
     );
   END IF;
+  
   RETURN NEW;
 END;
  $$;
@@ -1296,6 +1316,7 @@ CREATE TABLE IF NOT EXISTS "public"."matches" (
     "revealed_seed_at" timestamp with time zone,
     "created_at" timestamp with time zone DEFAULT "now"(),
     "go_green_ms" integer,
+    "reminder_sent" boolean DEFAULT false,
     CONSTRAINT "matches_game_type_check" CHECK (("game_type" = ANY (ARRAY['reaction_tap'::"text", 'holdout'::"text"]))),
     CONSTRAINT "matches_status_check" CHECK (("status" = ANY (ARRAY['waiting'::"text", 'live'::"text", 'completed'::"text", 'cancelled'::"text", 'errored'::"text"])))
 );
