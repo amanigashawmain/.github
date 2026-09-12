@@ -468,6 +468,32 @@ END;
 ALTER FUNCTION "public"."get_server_time"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_sms_queue_logs"() RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$ DECLARE
+  v_logs JSON;
+BEGIN
+  SELECT COALESCE(json_agg(json_build_object(
+    'id', id,
+    'raw_sms', raw_sms,
+    'parsed_amount', parsed_amount,
+    'parsed_reference', parsed_reference,
+    'matched_transaction_id', matched_transaction_id,
+    'status', status,
+    'admin_note', admin_note,
+    'received_at', received_at
+  ) ORDER BY received_at DESC), '[]'::json) 
+  INTO v_logs 
+  FROM sms_queue;
+  
+  RETURN v_logs;
+END;
+ $$;
+
+
+ALTER FUNCTION "public"."get_sms_queue_logs"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_system_health"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -2074,6 +2100,12 @@ GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_server_time"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_server_time"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_server_time"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_sms_queue_logs"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_sms_queue_logs"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_sms_queue_logs"() TO "service_role";
 
 
 

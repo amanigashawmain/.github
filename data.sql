@@ -4,7 +4,7 @@ SET session_replication_role = replica;
 -- PostgreSQL database dump
 --
 
--- \restrict 49jInBzkiqeHiFSpLwBz2lTMnuEKSbLdVgSHy6Ps2ZMmAxdks9LEvTL6HSCuAIl
+-- \restrict EphMW5tjzshQyJm6XUAVvn9Bjuec6JZr9Ifkn8sHzuG9Pdn0j4InoHs6FD8Avss
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -50,12 +50,14 @@ COPY "auth"."flow_state" ("id", "user_id", "auth_code", "code_challenge_method",
 --
 
 COPY "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") FROM stdin;
-00000000-0000-0000-0000-000000000000	51a9566d-d142-4f07-b339-89f012525bef	authenticated	authenticated	tg_8864071319@qedami.telegram	$2a$10$Se7au8HZpV7gtaxOXfgOrOVxsx.TU52nnovxuooIHt.nSh.V.fcLK	2026-08-30 19:21:56.461231+00	\N		\N		\N			\N	2026-08-31 06:35:45.039907+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-30 19:21:56.433054+00	2026-08-31 06:35:45.053355+00	\N	\N			\N		0	\N		\N	f	\N	f
-00000000-0000-0000-0000-000000000000	cc322760-a401-4e42-be48-54fa2d80ce27	authenticated	authenticated	tg_7752096524@qedami.telegram	$2a$10$VtVpzZ6Ykcu0sSD8jewWB.i/5OJdPsTy3LmXkETtbbKpor1tD7s7W	2026-08-23 13:09:24.879672+00	\N		\N		\N			\N	2026-09-10 13:06:24.601273+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-23 13:09:24.87455+00	2026-09-10 13:06:24.652111+00	\N	\N			\N		0	\N		\N	f	\N	f
-00000000-0000-0000-0000-000000000000	903d0e9f-6138-477c-9402-31e0ea7a6251	authenticated	authenticated	tg_6736730495@qedami.telegram	$2a$10$p5qoH8Nd6/HLNj.ei3CvBeK0Lsw9KW0Ool7jsvNgTadjSjBF8y/4e	2026-08-30 07:16:06.856616+00	\N		\N		\N			\N	2026-09-10 12:26:46.137173+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-30 07:16:06.85265+00	2026-09-10 13:26:10.023987+00	\N	\N			\N		0	\N		\N	f	\N	f
-00000000-0000-0000-0000-000000000000	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	authenticated	authenticated	tg_896997567@qedami.telegram	$2a$10$3ZPx8pkgKlQnpq01KkQZDerZUZi26v4UsR1l/DNwETU95KRIw.L/y	2026-08-23 13:04:26.900468+00	\N		\N		\N			\N	2026-09-10 14:38:01.40983+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-23 13:04:26.887392+00	2026-09-10 14:38:01.420318+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	9c533de4-547f-4343-abe1-875970d15142	authenticated	authenticated	tg_1725568865@qedami.telegram	$2a$10$Uy3hrFYpzb1ncsdJUwEkW.Ba0QSrbr8CUhno0yKf1yxxRJ9SGkr9G	2026-09-11 17:41:24.437583+00	\N		\N		\N			\N	2026-09-11 17:41:24.756847+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-09-11 17:41:24.392267+00	2026-09-11 17:41:24.809194+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	authenticated	authenticated	tg_7139428370@qedami.telegram	$2a$10$TK743wUr6EK/HM92eCilQ.YrMQht9WxQa74plpoTA4OzJ6uk4ByMi	2026-08-30 07:16:06.348239+00	\N		\N		\N			\N	2026-09-11 18:20:58.654754+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-30 07:16:06.337139+00	2026-09-11 18:20:58.660115+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	authenticated	authenticated	tg_896997567@qedami.telegram	$2a$10$3ZPx8pkgKlQnpq01KkQZDerZUZi26v4UsR1l/DNwETU95KRIw.L/y	2026-08-23 13:04:26.900468+00	\N		\N		\N			\N	2026-09-11 23:31:15.171251+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-23 13:04:26.887392+00	2026-09-12 01:28:28.01828+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	51a9566d-d142-4f07-b339-89f012525bef	authenticated	authenticated	tg_8864071319@qedami.telegram	$2a$10$Se7au8HZpV7gtaxOXfgOrOVxsx.TU52nnovxuooIHt.nSh.V.fcLK	2026-08-30 19:21:56.461231+00	\N		\N		\N			\N	2026-09-11 21:11:35.455985+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-30 19:21:56.433054+00	2026-09-11 23:01:06.745108+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	cc322760-a401-4e42-be48-54fa2d80ce27	authenticated	authenticated	tg_7752096524@qedami.telegram	$2a$10$VtVpzZ6Ykcu0sSD8jewWB.i/5OJdPsTy3LmXkETtbbKpor1tD7s7W	2026-08-23 13:09:24.879672+00	\N		\N		\N			\N	2026-09-11 23:01:38.861269+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-23 13:09:24.87455+00	2026-09-12 01:35:09.978461+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	903d0e9f-6138-477c-9402-31e0ea7a6251	authenticated	authenticated	tg_6736730495@qedami.telegram	$2a$10$p5qoH8Nd6/HLNj.ei3CvBeK0Lsw9KW0Ool7jsvNgTadjSjBF8y/4e	2026-08-30 07:16:06.856616+00	\N		\N		\N			\N	2026-09-11 23:01:12.201148+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-30 07:16:06.85265+00	2026-09-12 00:04:22.617098+00	\N	\N			\N		0	\N		\N	f	\N	f
+00000000-0000-0000-0000-000000000000	29152f5a-bf99-4801-a283-8fe34ffb8174	authenticated	authenticated	tg_7428247649@qedami.telegram	$2a$10$WNGqYQy/i8c1eAnmDCFG1eIqVCsIxVbBD.uJTU/sPwFsr2IZCuFDO	2026-09-11 13:37:02.648417+00	\N		\N		\N			\N	2026-09-11 13:53:47.492215+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-09-11 13:37:02.628639+00	2026-09-11 13:53:47.4952+00	\N	\N			\N		0	\N		\N	f	\N	f
 00000000-0000-0000-0000-000000000000	039510ee-c174-4043-bcf7-39a1d740a192	authenticated	authenticated	admin@qedami.app	$2a$10$MCHouV4Za1BHqjE3B9LQreuqrTjUEmvOC5IllSCWUfS0s1B9ztZ8C	2026-09-01 11:35:09.308042+00	\N		\N		\N			\N	2026-09-01 11:54:18.941047+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-09-01 11:35:09.259032+00	2026-09-01 11:54:18.95171+00	\N	\N			\N		0	\N		\N	f	\N	f
-00000000-0000-0000-0000-000000000000	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	authenticated	authenticated	tg_7139428370@qedami.telegram	$2a$10$TK743wUr6EK/HM92eCilQ.YrMQht9WxQa74plpoTA4OzJ6uk4ByMi	2026-08-30 07:16:06.348239+00	\N		\N		\N			\N	2026-09-10 09:19:33.477081+00	{"provider": "email", "providers": ["email"]}	{"email_verified": true}	\N	2026-08-30 07:16:06.337139+00	2026-09-10 09:19:33.480495+00	\N	\N			\N		0	\N		\N	f	\N	f
 \.
 
 
@@ -70,6 +72,8 @@ cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	{"sub"
 903d0e9f-6138-477c-9402-31e0ea7a6251	903d0e9f-6138-477c-9402-31e0ea7a6251	{"sub": "903d0e9f-6138-477c-9402-31e0ea7a6251", "email": "tg_6736730495@qedami.telegram", "email_verified": false, "phone_verified": false}	email	2026-08-30 07:16:06.853706+00	2026-08-30 07:16:06.853754+00	2026-08-30 07:16:06.853754+00	6c57614c-77c0-4402-a627-0f374ba20a93
 51a9566d-d142-4f07-b339-89f012525bef	51a9566d-d142-4f07-b339-89f012525bef	{"sub": "51a9566d-d142-4f07-b339-89f012525bef", "email": "tg_8864071319@qedami.telegram", "email_verified": false, "phone_verified": false}	email	2026-08-30 19:21:56.456617+00	2026-08-30 19:21:56.456672+00	2026-08-30 19:21:56.456672+00	ea3f3019-79fa-477b-b27d-70c805c8ff06
 039510ee-c174-4043-bcf7-39a1d740a192	039510ee-c174-4043-bcf7-39a1d740a192	{"sub": "039510ee-c174-4043-bcf7-39a1d740a192", "email": "admin@qedami.app", "email_verified": false, "phone_verified": false}	email	2026-09-01 11:35:09.293237+00	2026-09-01 11:35:09.293302+00	2026-09-01 11:35:09.293302+00	a3f21b0b-8a38-4587-b00a-be146b1e944a
+29152f5a-bf99-4801-a283-8fe34ffb8174	29152f5a-bf99-4801-a283-8fe34ffb8174	{"sub": "29152f5a-bf99-4801-a283-8fe34ffb8174", "email": "tg_7428247649@qedami.telegram", "email_verified": false, "phone_verified": false}	email	2026-09-11 13:37:02.642453+00	2026-09-11 13:37:02.642508+00	2026-09-11 13:37:02.642508+00	47d74a25-92e1-45ab-9ad1-9b818683ba34
+9c533de4-547f-4343-abe1-875970d15142	9c533de4-547f-4343-abe1-875970d15142	{"sub": "9c533de4-547f-4343-abe1-875970d15142", "email": "tg_1725568865@qedami.telegram", "email_verified": false, "phone_verified": false}	email	2026-09-11 17:41:24.42416+00	2026-09-11 17:41:24.424244+00	2026-09-11 17:41:24.424244+00	c37c5e6e-6118-48f5-b256-0dd90f7404b9
 \.
 
 
@@ -331,10 +335,72 @@ cedc8455-0c7c-44e8-9fa2-86612d1f5227	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-0
 81772806-77bf-4b2e-8346-c38d2b28e917	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-10 12:24:31.976335+00	2026-09-10 12:24:31.976335+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.95.53	\N	\N	\N	\N	\N
 f452c96b-6a1c-4195-b797-a36250d06732	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-10 12:25:51.969556+00	2026-09-10 12:25:51.969556+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.85.134	\N	\N	\N	\N	\N
 4be31ad2-e39a-4b32-8c9f-f9c65adc7673	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-10 12:28:58.810641+00	2026-09-10 12:28:58.810641+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.92.32	\N	\N	\N	\N	\N
-62016477-8e45-4f20-9cfc-6b42395b45a8	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-10 13:06:24.604313+00	2026-09-10 13:06:24.604313+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.175.144	\N	\N	\N	\N	\N
-4b1616cb-4795-4879-94a7-a82b3e996bf1	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-10 12:26:46.137259+00	2026-09-10 13:26:10.030187+00	\N	aal1	\N	2026-09-10 13:26:10.030071	Mozilla/5.0 (Linux; Android 12; K) Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.188.245.96	\N	\N	\N	\N	\N
+087437d4-1af6-45ca-93c1-74650ea8f915	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 13:52:51.609588+00	2026-09-11 13:52:51.609588+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.174.68	\N	\N	\N	\N	\N
 444eefa6-0463-4e47-8bce-7428acf7746a	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-10 12:24:59.508439+00	2026-09-10 14:38:00.577009+00	\N	aal1	\N	2026-09-10 14:38:00.576884	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0	196.188.245.96	\N	\N	\N	\N	\N
-196380fa-bc72-4b3d-8fbc-198304a3787c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-10 14:38:01.40994+00	2026-09-10 14:38:01.40994+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.143.169	\N	\N	\N	\N	\N
+196380fa-bc72-4b3d-8fbc-198304a3787c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-10 14:38:01.40994+00	2026-09-11 12:09:05.35267+00	\N	aal1	\N	2026-09-11 12:09:05.352563	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0	196.188.230.142	\N	\N	\N	\N	\N
+fbecef68-792c-41cd-b404-27f6c6f7b595	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 12:09:06.1881+00	2026-09-11 12:09:06.1881+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.83.216	\N	\N	\N	\N	\N
+7724dd9e-882c-429e-b8a1-7605e223db1e	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 12:11:33.157181+00	2026-09-11 12:11:33.157181+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.134.198	\N	\N	\N	\N	\N
+62016477-8e45-4f20-9cfc-6b42395b45a8	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-10 13:06:24.604313+00	2026-09-11 12:13:44.683552+00	\N	aal1	\N	2026-09-11 12:13:44.683419	Mozilla/5.0 (Linux; Android 16; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-S901U1; Android 16; SDK 36; HIGH)	196.188.230.142	\N	\N	\N	\N	\N
+aaa4ccca-7438-4713-b4e8-64b44fa23331	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 12:13:45.393793+00	2026-09-11 12:13:45.393793+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.16.35	\N	\N	\N	\N	\N
+8dfff4a6-a9b2-4a93-966b-467b3857c4b9	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 12:16:51.268316+00	2026-09-11 12:16:51.268316+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.83.216	\N	\N	\N	\N	\N
+409b817b-2f07-477c-9922-730b37970aae	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 12:34:48.142148+00	2026-09-11 12:34:48.142148+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.164.87	\N	\N	\N	\N	\N
+1a34b61b-fb99-4fbf-b98c-b43354f1d103	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 12:37:44.210158+00	2026-09-11 12:37:44.210158+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.19.155	\N	\N	\N	\N	\N
+6d93fb6d-73f9-4ed8-988d-e6936790c2f6	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 12:49:16.077753+00	2026-09-11 12:49:16.077753+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.91.26	\N	\N	\N	\N	\N
+ada16327-d6d7-4e96-91c7-6d33173e11e6	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:22:04.519196+00	2026-09-11 13:22:04.519196+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.164.225	\N	\N	\N	\N	\N
+2d39b35d-484f-431b-8112-a1e33c5c8f06	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:23:15.587974+00	2026-09-11 13:23:15.587974+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.18.200	\N	\N	\N	\N	\N
+0da04860-ed46-415e-b3e9-ec72b32db7fc	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:23:44.154857+00	2026-09-11 13:23:44.154857+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.110.95	\N	\N	\N	\N	\N
+60ee0d4d-f71b-4cff-b09b-4161e553dd2a	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:23:52.883008+00	2026-09-11 13:23:52.883008+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.60.210	\N	\N	\N	\N	\N
+f3b7ac5f-8a63-4ae5-a67f-b8eb6681aa9a	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:29:07.728558+00	2026-09-11 13:29:07.728558+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.79.125	\N	\N	\N	\N	\N
+e9417056-747b-4c42-8c25-29e23d36ffc8	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:30:15.757921+00	2026-09-11 13:30:15.757921+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.110.95	\N	\N	\N	\N	\N
+18437400-9909-4d25-b206-14c1bcb3ae36	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:32:40.213854+00	2026-09-11 13:32:40.213854+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.223.174	\N	\N	\N	\N	\N
+941be382-321e-4546-bbef-f0ee1e1b8e5e	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 13:34:09.747681+00	2026-09-11 13:34:09.747681+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.94.198	\N	\N	\N	\N	\N
+9f4c2236-ec06-48c2-8ee8-e5ac22cee741	29152f5a-bf99-4801-a283-8fe34ffb8174	2026-09-11 13:37:02.796302+00	2026-09-11 13:37:02.796302+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.72.135	\N	\N	\N	\N	\N
+ffb0b90c-0366-4db2-9684-de923c751e64	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:39:33.856179+00	2026-09-11 13:39:33.856179+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.1.12	\N	\N	\N	\N	\N
+4b1616cb-4795-4879-94a7-a82b3e996bf1	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-10 12:26:46.137259+00	2026-09-11 13:42:25.373768+00	\N	aal1	\N	2026-09-11 13:42:25.373651	Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.188.230.142	\N	\N	\N	\N	\N
+79e5654f-3717-4192-898f-db91d61f18bf	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:44:21.412275+00	2026-09-11 13:44:21.412275+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.6.79	\N	\N	\N	\N	\N
+85edfa9f-fa4d-41c8-a26e-ceac27a15ff4	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 13:45:55.398607+00	2026-09-11 13:45:55.398607+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.95.100	\N	\N	\N	\N	\N
+9091561b-ec61-4460-8958-ea49ea83b4e9	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 13:49:40.17816+00	2026-09-11 13:49:40.17816+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.49.150	\N	\N	\N	\N	\N
+0341fbcb-758d-4124-b633-bb74d0bf62ac	29152f5a-bf99-4801-a283-8fe34ffb8174	2026-09-11 13:53:26.254965+00	2026-09-11 13:53:26.254965+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.77.190	\N	\N	\N	\N	\N
+7f9e7d93-7554-45cd-9ffc-290f60b9fa7e	29152f5a-bf99-4801-a283-8fe34ffb8174	2026-09-11 13:53:47.492303+00	2026-09-11 13:53:47.492303+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.11.202	\N	\N	\N	\N	\N
+a91e84bb-402c-40d1-bec6-860ef4ff2547	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:20:21.554849+00	2026-09-11 14:20:21.554849+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.120.173	\N	\N	\N	\N	\N
+b9d20581-a195-4525-b09f-f2bad327c10d	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:21:03.801047+00	2026-09-11 14:21:03.801047+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.17.36	\N	\N	\N	\N	\N
+22d15de0-cba3-47f0-97f4-7ae102caf2e7	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:21:07.648549+00	2026-09-11 14:21:07.648549+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.118.69	\N	\N	\N	\N	\N
+9eab6a6b-4450-4164-94f7-5b734d73961f	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:24:43.044694+00	2026-09-11 14:24:43.044694+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.19.97	\N	\N	\N	\N	\N
+3aeb7a27-4acd-43eb-a485-b44135f5d1f2	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:31:52.967213+00	2026-09-11 14:31:52.967213+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.117.132	\N	\N	\N	\N	\N
+2d95982f-6dfe-45a3-a610-65071296b78e	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:32:24.244488+00	2026-09-11 14:32:24.244488+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.21.229	\N	\N	\N	\N	\N
+9c6fe077-fa82-4804-a9fb-fb09db429ab3	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:51:20.718792+00	2026-09-11 14:51:20.718792+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.89.217	\N	\N	\N	\N	\N
+c0838668-4ef6-412e-99a4-62172075b9cf	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:55:15.333485+00	2026-09-11 14:55:15.333485+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.32.223	\N	\N	\N	\N	\N
+fce8b59d-873d-4641-921d-16d085a7677f	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:55:43.287289+00	2026-09-11 14:55:43.287289+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.218.236	\N	\N	\N	\N	\N
+06870eff-f1b6-449a-b059-e8cda27a1216	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 13:42:26.596885+00	2026-09-11 15:06:30.483771+00	\N	aal1	\N	2026-09-11 15:06:30.483649	Mozilla/5.0 (Linux; Android 12; K) Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.188.230.142	\N	\N	\N	\N	\N
+78c70d30-53ca-4ca3-9d97-51f642a11d9b	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 15:06:31.138992+00	2026-09-11 15:06:31.138992+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.148.184	\N	\N	\N	\N	\N
+e31a3b04-db5e-42e1-88e0-01741c070f10	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:11:35.456075+00	2026-09-11 23:01:06.747595+00	\N	aal1	\N	2026-09-11 23:01:06.747478	Mozilla/5.0 (Linux; Android 16; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-S901U1; Android 16; SDK 36; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+499ed322-a284-4d51-8198-ac8314bebb92	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 23:01:07.548451+00	2026-09-11 23:01:07.548451+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.75.42	\N	\N	\N	\N	\N
+832cfac3-83a6-4fc2-a72f-183bc85539bd	9c533de4-547f-4343-abe1-875970d15142	2026-09-11 17:41:24.760971+00	2026-09-11 17:41:24.760971+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.90.212	\N	\N	\N	\N	\N
+8e54fda4-139e-40ea-be5b-421ae22d6871	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 15:04:50.255278+00	2026-09-11 18:19:00.827124+00	\N	aal1	\N	2026-09-11 18:19:00.82701	Mozilla/5.0 (Linux; Android 16; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-S901U1; Android 16; SDK 36; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+ef0927a8-6b85-45bb-a842-90a3d1e4f624	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 18:19:01.693674+00	2026-09-11 18:19:01.693674+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.63.210.221	\N	\N	\N	\N	\N
+84b430fe-2c6a-4621-9451-ddb6d2f808ae	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 12:18:04.977616+00	2026-09-11 18:19:02.874481+00	\N	aal1	\N	2026-09-11 18:19:02.874381	Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148	196.191.122.44	\N	\N	\N	\N	\N
+7f6b546a-2f6a-4b5d-b2f8-ddbf885c4b53	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 18:19:03.573716+00	2026-09-11 18:19:03.573716+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.1.72	\N	\N	\N	\N	\N
+86806982-de91-44f9-b89b-280e725e7c62	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 18:20:25.892048+00	2026-09-11 18:20:25.892048+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.19.177	\N	\N	\N	\N	\N
+ab143993-2a6a-4f2c-a12b-e774574f0357	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 18:20:43.123616+00	2026-09-11 18:20:43.123616+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.127.255	\N	\N	\N	\N	\N
+375380ab-f52d-4bb4-894b-d3faba012fbe	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	2026-09-11 18:20:58.654859+00	2026-09-11 18:20:58.654859+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.85.160	\N	\N	\N	\N	\N
+155a59cb-3f54-4062-9a00-f9b64b2f448f	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 21:07:14.020393+00	2026-09-11 23:01:11.601386+00	\N	aal1	\N	2026-09-11 23:01:11.601288	Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+709f1dc3-4d96-4626-b96f-3dafc18c94ab	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 15:07:25.325758+00	2026-09-11 18:23:38.59661+00	\N	aal1	\N	2026-09-11 18:23:38.596503	Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+1e916f58-271c-4e4b-b25e-533aa2a61f70	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 18:23:39.291616+00	2026-09-11 18:23:39.291616+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.81.208	\N	\N	\N	\N	\N
+8d6020d6-25dd-4390-959a-2d5a632cc2bb	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 18:23:39.299792+00	2026-09-11 18:23:39.299792+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.209.224	\N	\N	\N	\N	\N
+7cb5e5d8-e94c-4f64-ab07-da8e39329280	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 18:23:39.621924+00	2026-09-11 18:23:39.621924+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.147.38	\N	\N	\N	\N	\N
+16c74870-bc66-4332-b187-7cec7f362955	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 18:24:50.452849+00	2026-09-11 20:37:06.061577+00	\N	aal1	\N	2026-09-11 20:37:06.06141	Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+a64e3320-9ef1-4b65-80f0-03ef1e9ba4a5	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 18:22:35.076202+00	2026-09-11 21:06:22.002698+00	\N	aal1	\N	2026-09-11 21:06:22.002559	Mozilla/5.0 (Linux; Android 16; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-S901U1; Android 16; SDK 36; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+0ea41969-37ae-430e-b25b-bbe04bfc26f4	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:06:22.610784+00	2026-09-11 21:06:22.610784+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.37.208	\N	\N	\N	\N	\N
+cc354139-8143-45e0-8bf2-fc66773b620f	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 21:06:30.121188+00	2026-09-11 21:06:30.121188+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.96.21.179	\N	\N	\N	\N	\N
+330234b6-070c-4041-8713-66f3c9f7124a	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 21:06:51.670432+00	2026-09-11 21:06:51.670432+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	51.34.117.132	\N	\N	\N	\N	\N
+f0167bfa-bf9f-4fd6-9c85-658c9c5ea406	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:55:37.961117+00	2026-09-11 21:10:25.321161+00	\N	aal1	\N	2026-09-11 21:10:25.321049	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0	196.191.122.44	\N	\N	\N	\N	\N
+4478b3a5-d92b-43a1-b71e-6c7c337f7ecc	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 21:10:25.981344+00	2026-09-11 21:10:25.981344+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.240.94	\N	\N	\N	\N	\N
+0fd1dde7-7755-4ac5-9ab7-7f240459a870	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 21:11:14.91222+00	2026-09-11 21:11:14.91222+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.62.170.85	\N	\N	\N	\N	\N
+61139365-9752-4fc3-858f-d2281f01ba47	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 23:01:25.082245+00	2026-09-11 23:01:25.082245+00	\N	aal1	\N	\N	Deno/2.1.4 (variant; SupabaseEdgeRuntime/1.76.0; ref=gjjfoxcxmpyzmiaiwpyi)	16.18.129.206	\N	\N	\N	\N	\N
+c66fd7ca-44b4-4885-a365-83a0bf92a511	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 21:38:42.429343+00	2026-09-11 23:31:14.389984+00	\N	aal1	\N	2026-09-11 23:31:14.389876	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0	196.191.122.44	\N	\N	\N	\N	\N
+106fd79c-7628-4237-b693-c6676d7aba39	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 23:01:12.201248+00	2026-09-12 00:04:22.636798+00	\N	aal1	\N	2026-09-12 00:04:22.636659	Mozilla/5.0 (Linux; Android 12; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-G973F; Android 12; SDK 31; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
+2a0019a8-e31a-47a2-af11-0e7167301d07	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 23:31:15.171373+00	2026-09-12 01:28:28.034589+00	\N	aal1	\N	2026-09-12 01:28:28.034482	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36 Edg/153.0.0.0	196.191.122.44	\N	\N	\N	\N	\N
+9c2ecdb5-8591-49ad-bd15-c07eea574d92	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 23:01:38.861355+00	2026-09-12 01:35:09.996137+00	\N	aal1	\N	2026-09-12 01:35:09.996025	Mozilla/5.0 (Linux; Android 16; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.199 Mobile Safari/537.36 Telegram-Android/12.10.1 (Samsung SM-S901U1; Android 16; SDK 36; HIGH)	196.191.122.44	\N	\N	\N	\N	\N
 \.
 
 
@@ -584,6 +650,68 @@ f452c96b-6a1c-4195-b797-a36250d06732	2026-09-10 12:25:51.974873+00	2026-09-10 12
 4be31ad2-e39a-4b32-8c9f-f9c65adc7673	2026-09-10 12:28:58.822973+00	2026-09-10 12:28:58.822973+00	password	693010fd-52ef-4c9b-8f28-599a5303c589
 62016477-8e45-4f20-9cfc-6b42395b45a8	2026-09-10 13:06:24.662722+00	2026-09-10 13:06:24.662722+00	password	cf8dd41d-0019-4a6c-bcfd-ab6a61083724
 196380fa-bc72-4b3d-8fbc-198304a3787c	2026-09-10 14:38:01.427923+00	2026-09-10 14:38:01.427923+00	password	84ef394a-21bf-4dfd-bca0-95d42d384904
+fbecef68-792c-41cd-b404-27f6c6f7b595	2026-09-11 12:09:06.212782+00	2026-09-11 12:09:06.212782+00	password	f31bba98-77a0-436e-8c94-e4df4bdc2450
+7724dd9e-882c-429e-b8a1-7605e223db1e	2026-09-11 12:11:33.174114+00	2026-09-11 12:11:33.174114+00	password	e18cda5f-4602-41f4-ac53-8fd98bc47da1
+aaa4ccca-7438-4713-b4e8-64b44fa23331	2026-09-11 12:13:45.416236+00	2026-09-11 12:13:45.416236+00	password	5dfafae7-d068-4a51-a888-415ea62c1bcc
+8dfff4a6-a9b2-4a93-966b-467b3857c4b9	2026-09-11 12:16:51.285535+00	2026-09-11 12:16:51.285535+00	password	9a51d333-f27a-47fe-806c-8dc479e82901
+84b430fe-2c6a-4621-9451-ddb6d2f808ae	2026-09-11 12:18:04.99052+00	2026-09-11 12:18:04.99052+00	password	f6960e60-b5bd-4968-a1da-6c6de38d16a6
+409b817b-2f07-477c-9922-730b37970aae	2026-09-11 12:34:48.186639+00	2026-09-11 12:34:48.186639+00	password	8591823c-e339-4555-b970-6659c6031000
+1a34b61b-fb99-4fbf-b98c-b43354f1d103	2026-09-11 12:37:44.2195+00	2026-09-11 12:37:44.2195+00	password	fa4ddadc-7d0a-4bfb-a854-0705d73a7e7b
+6d93fb6d-73f9-4ed8-988d-e6936790c2f6	2026-09-11 12:49:16.12376+00	2026-09-11 12:49:16.12376+00	password	2f5cd305-82b5-4022-93d3-089ee119b317
+ada16327-d6d7-4e96-91c7-6d33173e11e6	2026-09-11 13:22:04.569298+00	2026-09-11 13:22:04.569298+00	password	0a502301-c6b0-4150-93ef-4f7f24032d58
+2d39b35d-484f-431b-8112-a1e33c5c8f06	2026-09-11 13:23:15.610009+00	2026-09-11 13:23:15.610009+00	password	dd46ad7d-9ba9-453e-9be8-5b20e352c682
+0da04860-ed46-415e-b3e9-ec72b32db7fc	2026-09-11 13:23:44.163813+00	2026-09-11 13:23:44.163813+00	password	1e29753d-3d7e-438b-a9ae-c655ca4bb3f4
+60ee0d4d-f71b-4cff-b09b-4161e553dd2a	2026-09-11 13:23:52.88583+00	2026-09-11 13:23:52.88583+00	password	5931d354-ad7d-4ca9-a353-f4e3de4329ee
+f3b7ac5f-8a63-4ae5-a67f-b8eb6681aa9a	2026-09-11 13:29:07.77399+00	2026-09-11 13:29:07.77399+00	password	636d56dc-5b6f-406d-b6f9-7897c5ce9f51
+e9417056-747b-4c42-8c25-29e23d36ffc8	2026-09-11 13:30:15.766062+00	2026-09-11 13:30:15.766062+00	password	bd5ad885-552a-4a54-9a39-8d00eac93520
+18437400-9909-4d25-b206-14c1bcb3ae36	2026-09-11 13:32:40.244875+00	2026-09-11 13:32:40.244875+00	password	ef9a2dee-2f01-4c62-b4cd-9bdd94df61d3
+941be382-321e-4546-bbef-f0ee1e1b8e5e	2026-09-11 13:34:09.764713+00	2026-09-11 13:34:09.764713+00	password	9f8646fc-4839-4b73-8e9b-cf350a376450
+9f4c2236-ec06-48c2-8ee8-e5ac22cee741	2026-09-11 13:37:02.804515+00	2026-09-11 13:37:02.804515+00	password	6f2795ac-761a-4da8-ac0e-6707a2a80581
+ffb0b90c-0366-4db2-9684-de923c751e64	2026-09-11 13:39:33.86644+00	2026-09-11 13:39:33.86644+00	password	693b2a2d-37ff-4d1d-bf02-d07e114143a9
+06870eff-f1b6-449a-b059-e8cda27a1216	2026-09-11 13:42:26.602038+00	2026-09-11 13:42:26.602038+00	password	d3868b93-9a2d-480c-a977-f220860a05c3
+79e5654f-3717-4192-898f-db91d61f18bf	2026-09-11 13:44:21.425124+00	2026-09-11 13:44:21.425124+00	password	4babdc6f-a59e-4488-9424-beae98783248
+85edfa9f-fa4d-41c8-a26e-ceac27a15ff4	2026-09-11 13:45:55.45506+00	2026-09-11 13:45:55.45506+00	password	7e443743-226f-4cac-b6bb-049d4ee67a0e
+9091561b-ec61-4460-8958-ea49ea83b4e9	2026-09-11 13:49:40.199393+00	2026-09-11 13:49:40.199393+00	password	3808c82b-ba6c-4b53-8cc8-73091d07023f
+087437d4-1af6-45ca-93c1-74650ea8f915	2026-09-11 13:52:51.643423+00	2026-09-11 13:52:51.643423+00	password	814c5e24-99e0-4ced-8de9-9e2b16fb0bc5
+0341fbcb-758d-4124-b633-bb74d0bf62ac	2026-09-11 13:53:26.268461+00	2026-09-11 13:53:26.268461+00	password	46811441-d122-47e3-9cae-72872c24452e
+7f9e7d93-7554-45cd-9ffc-290f60b9fa7e	2026-09-11 13:53:47.495677+00	2026-09-11 13:53:47.495677+00	password	a09f71f0-45d9-4d4a-9b3d-b5c9c843394f
+a91e84bb-402c-40d1-bec6-860ef4ff2547	2026-09-11 14:20:21.609748+00	2026-09-11 14:20:21.609748+00	password	6fd2f777-ebbe-4b14-8cd0-901e37d1ca4b
+b9d20581-a195-4525-b09f-f2bad327c10d	2026-09-11 14:21:03.874915+00	2026-09-11 14:21:03.874915+00	password	f6f72288-cce0-4517-8db3-27dc98d7516b
+22d15de0-cba3-47f0-97f4-7ae102caf2e7	2026-09-11 14:21:07.700585+00	2026-09-11 14:21:07.700585+00	password	84583af9-ab07-4850-91e5-4b766f7af1f9
+9eab6a6b-4450-4164-94f7-5b734d73961f	2026-09-11 14:24:43.063228+00	2026-09-11 14:24:43.063228+00	password	d2fe5206-16c8-49cf-b1f4-c89e3ed3a9af
+3aeb7a27-4acd-43eb-a485-b44135f5d1f2	2026-09-11 14:31:53.062708+00	2026-09-11 14:31:53.062708+00	password	cbac2718-78d3-4bb9-a68e-09e5bd153973
+2d95982f-6dfe-45a3-a610-65071296b78e	2026-09-11 14:32:24.251049+00	2026-09-11 14:32:24.251049+00	password	cb726d94-ec11-432a-8b89-66758ff41743
+9c6fe077-fa82-4804-a9fb-fb09db429ab3	2026-09-11 14:51:20.776501+00	2026-09-11 14:51:20.776501+00	password	7818ff44-0707-491d-8865-dae4b23499bd
+c0838668-4ef6-412e-99a4-62172075b9cf	2026-09-11 14:55:15.346169+00	2026-09-11 14:55:15.346169+00	password	c40cd488-86a5-4a28-898e-39247d9c886d
+f0167bfa-bf9f-4fd6-9c85-658c9c5ea406	2026-09-11 14:55:37.976152+00	2026-09-11 14:55:37.976152+00	password	497cef9c-cc40-4ff7-9416-7afd0f67c75d
+fce8b59d-873d-4641-921d-16d085a7677f	2026-09-11 14:55:43.310836+00	2026-09-11 14:55:43.310836+00	password	586c47bb-9fe4-4292-a6da-1375b82322ae
+8e54fda4-139e-40ea-be5b-421ae22d6871	2026-09-11 15:04:50.295541+00	2026-09-11 15:04:50.295541+00	password	081ae830-a905-4893-b821-1a45ea384f75
+78c70d30-53ca-4ca3-9d97-51f642a11d9b	2026-09-11 15:06:31.144462+00	2026-09-11 15:06:31.144462+00	password	a5fd5f4f-eebc-4a5c-b50f-899eac8dd53f
+709f1dc3-4d96-4626-b96f-3dafc18c94ab	2026-09-11 15:07:25.339201+00	2026-09-11 15:07:25.339201+00	password	fe6a2358-da34-49ac-bd68-219c44c7941c
+832cfac3-83a6-4fc2-a72f-183bc85539bd	2026-09-11 17:41:24.811939+00	2026-09-11 17:41:24.811939+00	password	94a06eea-ecbe-4e4c-8417-3c5df42d3333
+ef0927a8-6b85-45bb-a842-90a3d1e4f624	2026-09-11 18:19:01.723542+00	2026-09-11 18:19:01.723542+00	password	301667a6-9448-4754-b1ed-e1d47309f378
+7f6b546a-2f6a-4b5d-b2f8-ddbf885c4b53	2026-09-11 18:19:03.578423+00	2026-09-11 18:19:03.578423+00	password	3f743abb-dfe6-4cde-915c-fe7f7ccd3d54
+86806982-de91-44f9-b89b-280e725e7c62	2026-09-11 18:20:25.91244+00	2026-09-11 18:20:25.91244+00	password	dc3cdac9-fa24-4900-85c5-e07c696efb42
+ab143993-2a6a-4f2c-a12b-e774574f0357	2026-09-11 18:20:43.126513+00	2026-09-11 18:20:43.126513+00	password	80122507-db00-486e-b007-e58baa0f2cf4
+375380ab-f52d-4bb4-894b-d3faba012fbe	2026-09-11 18:20:58.661038+00	2026-09-11 18:20:58.661038+00	password	7f142aed-109c-4469-8bfc-d797f22a0af4
+a64e3320-9ef1-4b65-80f0-03ef1e9ba4a5	2026-09-11 18:22:35.082667+00	2026-09-11 18:22:35.082667+00	password	4dff4a1b-60f2-42d2-8493-d5fee74c19f6
+1e916f58-271c-4e4b-b25e-533aa2a61f70	2026-09-11 18:23:39.295298+00	2026-09-11 18:23:39.295298+00	password	2cc6c78e-ac32-44a7-96d7-1f24319dc01f
+8d6020d6-25dd-4390-959a-2d5a632cc2bb	2026-09-11 18:23:39.307661+00	2026-09-11 18:23:39.307661+00	password	903d9b18-0599-48b2-8ae6-19b459583ff7
+7cb5e5d8-e94c-4f64-ab07-da8e39329280	2026-09-11 18:23:39.624921+00	2026-09-11 18:23:39.624921+00	password	f1f91630-1b3e-4f87-8bb1-e665d3514d3e
+16c74870-bc66-4332-b187-7cec7f362955	2026-09-11 18:24:50.494994+00	2026-09-11 18:24:50.494994+00	password	38822b08-1968-41bd-84f0-0df0e1508ea9
+0ea41969-37ae-430e-b25b-bbe04bfc26f4	2026-09-11 21:06:22.632014+00	2026-09-11 21:06:22.632014+00	password	97011d62-b903-4e1c-ad7e-a943c95ae3d5
+cc354139-8143-45e0-8bf2-fc66773b620f	2026-09-11 21:06:30.127137+00	2026-09-11 21:06:30.127137+00	password	9665a04c-3617-42b2-a29e-a3dab5797a60
+330234b6-070c-4041-8713-66f3c9f7124a	2026-09-11 21:06:51.672843+00	2026-09-11 21:06:51.672843+00	password	24a22dcc-9cc2-40f0-bf37-2a7c6c2a3e59
+155a59cb-3f54-4062-9a00-f9b64b2f448f	2026-09-11 21:07:14.022737+00	2026-09-11 21:07:14.022737+00	password	2c7f373c-a8d6-417e-83eb-ada5e6e36607
+4478b3a5-d92b-43a1-b71e-6c7c337f7ecc	2026-09-11 21:10:25.985253+00	2026-09-11 21:10:25.985253+00	password	b2011d2e-1fc1-40fd-90d2-bc14374fd95f
+0fd1dde7-7755-4ac5-9ab7-7f240459a870	2026-09-11 21:11:14.915855+00	2026-09-11 21:11:14.915855+00	password	6c63daff-1eef-4b16-bfce-36ec719d149c
+e31a3b04-db5e-42e1-88e0-01741c070f10	2026-09-11 21:11:35.461268+00	2026-09-11 21:11:35.461268+00	password	dd611e64-b55b-40db-9595-545ebb936296
+c66fd7ca-44b4-4885-a365-83a0bf92a511	2026-09-11 21:38:42.528271+00	2026-09-11 21:38:42.528271+00	password	c78c73fa-8009-47e5-8cde-e873dea30e68
+499ed322-a284-4d51-8198-ac8314bebb92	2026-09-11 23:01:07.564763+00	2026-09-11 23:01:07.564763+00	password	e2198696-5651-4e37-866e-af101b70f682
+106fd79c-7628-4237-b693-c6676d7aba39	2026-09-11 23:01:12.204129+00	2026-09-11 23:01:12.204129+00	password	98f85b54-f93d-4621-a218-bb8044f3f36e
+61139365-9752-4fc3-858f-d2281f01ba47	2026-09-11 23:01:25.088207+00	2026-09-11 23:01:25.088207+00	password	9aee6c4c-b4cc-46e9-8d36-5de2e6747460
+9c2ecdb5-8591-49ad-bd15-c07eea574d92	2026-09-11 23:01:38.865388+00	2026-09-11 23:01:38.865388+00	password	1cffad8f-ed45-4a5f-905b-3149a8b6d99d
+2a0019a8-e31a-47a2-af11-0e7167301d07	2026-09-11 23:31:15.192693+00	2026-09-11 23:31:15.192693+00	password	450376af-186f-4d80-8521-1717371d5298
 \.
 
 
@@ -959,12 +1087,94 @@ COPY "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "revoked"
 00000000-0000-0000-0000-000000000000	456	zdvjsa5epjom	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-10 12:24:31.996599+00	2026-09-10 12:24:31.996599+00	\N	81772806-77bf-4b2e-8346-c38d2b28e917
 00000000-0000-0000-0000-000000000000	458	5wqpgm5x42t6	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-10 12:25:51.971389+00	2026-09-10 12:25:51.971389+00	\N	f452c96b-6a1c-4195-b797-a36250d06732
 00000000-0000-0000-0000-000000000000	460	4fk27cfzosdk	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-10 12:28:58.81742+00	2026-09-10 12:28:58.81742+00	\N	4be31ad2-e39a-4b32-8c9f-f9c65adc7673
-00000000-0000-0000-0000-000000000000	461	dtxsmzbxmfdd	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-10 13:06:24.624104+00	2026-09-10 13:06:24.624104+00	\N	62016477-8e45-4f20-9cfc-6b42395b45a8
 00000000-0000-0000-0000-000000000000	459	jlykat64znvs	903d0e9f-6138-477c-9402-31e0ea7a6251	t	2026-09-10 12:26:46.143761+00	2026-09-10 13:26:10.007126+00	\N	4b1616cb-4795-4879-94a7-a82b3e996bf1
-00000000-0000-0000-0000-000000000000	462	jeliy4rnae3h	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-10 13:26:10.016578+00	2026-09-10 13:26:10.016578+00	jlykat64znvs	4b1616cb-4795-4879-94a7-a82b3e996bf1
 00000000-0000-0000-0000-000000000000	457	hviiuvnfowln	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-10 12:24:59.522319+00	2026-09-10 14:38:00.535592+00	\N	444eefa6-0463-4e47-8bce-7428acf7746a
 00000000-0000-0000-0000-000000000000	463	l7kz6t555ehd	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-10 14:38:00.551587+00	2026-09-10 14:38:00.551587+00	hviiuvnfowln	444eefa6-0463-4e47-8bce-7428acf7746a
-00000000-0000-0000-0000-000000000000	464	nzmojlejyhoi	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-10 14:38:01.418791+00	2026-09-10 14:38:01.418791+00	\N	196380fa-bc72-4b3d-8fbc-198304a3787c
+00000000-0000-0000-0000-000000000000	464	nzmojlejyhoi	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-10 14:38:01.418791+00	2026-09-11 12:09:05.304059+00	\N	196380fa-bc72-4b3d-8fbc-198304a3787c
+00000000-0000-0000-0000-000000000000	465	on3t4ll527dl	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 12:09:05.320986+00	2026-09-11 12:09:05.320986+00	nzmojlejyhoi	196380fa-bc72-4b3d-8fbc-198304a3787c
+00000000-0000-0000-0000-000000000000	466	ddx636ys4w75	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 12:09:06.197993+00	2026-09-11 12:09:06.197993+00	\N	fbecef68-792c-41cd-b404-27f6c6f7b595
+00000000-0000-0000-0000-000000000000	467	eugc5yh7vwhr	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 12:11:33.168004+00	2026-09-11 12:11:33.168004+00	\N	7724dd9e-882c-429e-b8a1-7605e223db1e
+00000000-0000-0000-0000-000000000000	461	dtxsmzbxmfdd	cc322760-a401-4e42-be48-54fa2d80ce27	t	2026-09-10 13:06:24.624104+00	2026-09-11 12:13:44.637668+00	\N	62016477-8e45-4f20-9cfc-6b42395b45a8
+00000000-0000-0000-0000-000000000000	468	rfydrifuap5a	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 12:13:44.66144+00	2026-09-11 12:13:44.66144+00	dtxsmzbxmfdd	62016477-8e45-4f20-9cfc-6b42395b45a8
+00000000-0000-0000-0000-000000000000	469	6td65u4cpsmq	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 12:13:45.405432+00	2026-09-11 12:13:45.405432+00	\N	aaa4ccca-7438-4713-b4e8-64b44fa23331
+00000000-0000-0000-0000-000000000000	470	mzvejvzypjua	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 12:16:51.276744+00	2026-09-11 12:16:51.276744+00	\N	8dfff4a6-a9b2-4a93-966b-467b3857c4b9
+00000000-0000-0000-0000-000000000000	472	lnloa4bbvj7j	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 12:34:48.156509+00	2026-09-11 12:34:48.156509+00	\N	409b817b-2f07-477c-9922-730b37970aae
+00000000-0000-0000-0000-000000000000	473	pi64whmwff5l	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 12:37:44.216928+00	2026-09-11 12:37:44.216928+00	\N	1a34b61b-fb99-4fbf-b98c-b43354f1d103
+00000000-0000-0000-0000-000000000000	474	336ep2wvhsm4	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 12:49:16.09993+00	2026-09-11 12:49:16.09993+00	\N	6d93fb6d-73f9-4ed8-988d-e6936790c2f6
+00000000-0000-0000-0000-000000000000	475	p26utgvjpnp5	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:22:04.538125+00	2026-09-11 13:22:04.538125+00	\N	ada16327-d6d7-4e96-91c7-6d33173e11e6
+00000000-0000-0000-0000-000000000000	476	2o5v3w7xsxu5	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:23:15.600762+00	2026-09-11 13:23:15.600762+00	\N	2d39b35d-484f-431b-8112-a1e33c5c8f06
+00000000-0000-0000-0000-000000000000	477	c6uwf3iktzvo	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:23:44.160593+00	2026-09-11 13:23:44.160593+00	\N	0da04860-ed46-415e-b3e9-ec72b32db7fc
+00000000-0000-0000-0000-000000000000	478	si74grwfkjwy	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:23:52.884117+00	2026-09-11 13:23:52.884117+00	\N	60ee0d4d-f71b-4cff-b09b-4161e553dd2a
+00000000-0000-0000-0000-000000000000	479	x273dsnqrqyw	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:29:07.752563+00	2026-09-11 13:29:07.752563+00	\N	f3b7ac5f-8a63-4ae5-a67f-b8eb6681aa9a
+00000000-0000-0000-0000-000000000000	480	rzzdapa655mw	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:30:15.763018+00	2026-09-11 13:30:15.763018+00	\N	e9417056-747b-4c42-8c25-29e23d36ffc8
+00000000-0000-0000-0000-000000000000	481	rnhap5brmn4y	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:32:40.221801+00	2026-09-11 13:32:40.221801+00	\N	18437400-9909-4d25-b206-14c1bcb3ae36
+00000000-0000-0000-0000-000000000000	482	lqyat2ab3uvo	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 13:34:09.754969+00	2026-09-11 13:34:09.754969+00	\N	941be382-321e-4546-bbef-f0ee1e1b8e5e
+00000000-0000-0000-0000-000000000000	483	45pmm3gyzj7u	29152f5a-bf99-4801-a283-8fe34ffb8174	f	2026-09-11 13:37:02.799971+00	2026-09-11 13:37:02.799971+00	\N	9f4c2236-ec06-48c2-8ee8-e5ac22cee741
+00000000-0000-0000-0000-000000000000	484	4ot7o2hssosq	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:39:33.86294+00	2026-09-11 13:39:33.86294+00	\N	ffb0b90c-0366-4db2-9684-de923c751e64
+00000000-0000-0000-0000-000000000000	462	jeliy4rnae3h	903d0e9f-6138-477c-9402-31e0ea7a6251	t	2026-09-10 13:26:10.016578+00	2026-09-11 13:42:25.349543+00	jlykat64znvs	4b1616cb-4795-4879-94a7-a82b3e996bf1
+00000000-0000-0000-0000-000000000000	485	qckczwyael2x	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 13:42:25.3606+00	2026-09-11 13:42:25.3606+00	jeliy4rnae3h	4b1616cb-4795-4879-94a7-a82b3e996bf1
+00000000-0000-0000-0000-000000000000	487	u2xpzy3tm5ps	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:44:21.420245+00	2026-09-11 13:44:21.420245+00	\N	79e5654f-3717-4192-898f-db91d61f18bf
+00000000-0000-0000-0000-000000000000	488	62thowjgdtk7	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 13:45:55.424171+00	2026-09-11 13:45:55.424171+00	\N	85edfa9f-fa4d-41c8-a26e-ceac27a15ff4
+00000000-0000-0000-0000-000000000000	489	jsaorso5iynd	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 13:49:40.185853+00	2026-09-11 13:49:40.185853+00	\N	9091561b-ec61-4460-8958-ea49ea83b4e9
+00000000-0000-0000-0000-000000000000	490	pwljn7c5xx3h	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 13:52:51.615517+00	2026-09-11 13:52:51.615517+00	\N	087437d4-1af6-45ca-93c1-74650ea8f915
+00000000-0000-0000-0000-000000000000	486	g7cnyhyhxbbt	903d0e9f-6138-477c-9402-31e0ea7a6251	t	2026-09-11 13:42:26.599517+00	2026-09-11 15:06:30.460046+00	\N	06870eff-f1b6-449a-b059-e8cda27a1216
+00000000-0000-0000-0000-000000000000	471	nles7qhwa5ua	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	t	2026-09-11 12:18:04.987609+00	2026-09-11 18:19:02.869206+00	\N	84b430fe-2c6a-4621-9451-ddb6d2f808ae
+00000000-0000-0000-0000-000000000000	491	6p2lwvikx6hs	29152f5a-bf99-4801-a283-8fe34ffb8174	f	2026-09-11 13:53:26.261312+00	2026-09-11 13:53:26.261312+00	\N	0341fbcb-758d-4124-b633-bb74d0bf62ac
+00000000-0000-0000-0000-000000000000	492	smuz5vmbbdod	29152f5a-bf99-4801-a283-8fe34ffb8174	f	2026-09-11 13:53:47.493321+00	2026-09-11 13:53:47.493321+00	\N	7f9e7d93-7554-45cd-9ffc-290f60b9fa7e
+00000000-0000-0000-0000-000000000000	493	pvnwy4jpivza	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 14:20:21.574434+00	2026-09-11 14:20:21.574434+00	\N	a91e84bb-402c-40d1-bec6-860ef4ff2547
+00000000-0000-0000-0000-000000000000	494	b63xdkimo7ju	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 14:21:03.839288+00	2026-09-11 14:21:03.839288+00	\N	b9d20581-a195-4525-b09f-f2bad327c10d
+00000000-0000-0000-0000-000000000000	495	po4bncudnlm7	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 14:21:07.662185+00	2026-09-11 14:21:07.662185+00	\N	22d15de0-cba3-47f0-97f4-7ae102caf2e7
+00000000-0000-0000-0000-000000000000	496	y655zfaxchmk	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 14:24:43.055543+00	2026-09-11 14:24:43.055543+00	\N	9eab6a6b-4450-4164-94f7-5b734d73961f
+00000000-0000-0000-0000-000000000000	497	emhopl7awexr	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 14:31:53.0041+00	2026-09-11 14:31:53.0041+00	\N	3aeb7a27-4acd-43eb-a485-b44135f5d1f2
+00000000-0000-0000-0000-000000000000	498	dwzf4e3r6cji	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 14:32:24.248214+00	2026-09-11 14:32:24.248214+00	\N	2d95982f-6dfe-45a3-a610-65071296b78e
+00000000-0000-0000-0000-000000000000	499	t3y3dhrlkbkl	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 14:51:20.743772+00	2026-09-11 14:51:20.743772+00	\N	9c6fe077-fa82-4804-a9fb-fb09db429ab3
+00000000-0000-0000-0000-000000000000	500	rb3amjbcodva	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 14:55:15.338752+00	2026-09-11 14:55:15.338752+00	\N	c0838668-4ef6-412e-99a4-62172075b9cf
+00000000-0000-0000-0000-000000000000	502	75rpmwfis7zq	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 14:55:43.293207+00	2026-09-11 14:55:43.293207+00	\N	fce8b59d-873d-4641-921d-16d085a7677f
+00000000-0000-0000-0000-000000000000	504	uiecv5skepzi	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 15:06:30.46575+00	2026-09-11 15:06:30.46575+00	g7cnyhyhxbbt	06870eff-f1b6-449a-b059-e8cda27a1216
+00000000-0000-0000-0000-000000000000	505	l4hryoxqn3gq	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 15:06:31.141279+00	2026-09-11 15:06:31.141279+00	\N	78c70d30-53ca-4ca3-9d97-51f642a11d9b
+00000000-0000-0000-0000-000000000000	501	o5s5lzgfe35p	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-11 14:55:37.970672+00	2026-09-11 15:53:39.042695+00	\N	f0167bfa-bf9f-4fd6-9c85-658c9c5ea406
+00000000-0000-0000-0000-000000000000	507	6rm7hfqnh5tn	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-11 15:53:39.055966+00	2026-09-11 16:52:14.240916+00	o5s5lzgfe35p	f0167bfa-bf9f-4fd6-9c85-658c9c5ea406
+00000000-0000-0000-0000-000000000000	509	ke3raio2rxpr	9c533de4-547f-4343-abe1-875970d15142	f	2026-09-11 17:41:24.783904+00	2026-09-11 17:41:24.783904+00	\N	832cfac3-83a6-4fc2-a72f-183bc85539bd
+00000000-0000-0000-0000-000000000000	503	hqabrimoz5ng	cc322760-a401-4e42-be48-54fa2d80ce27	t	2026-09-11 15:04:50.273337+00	2026-09-11 18:19:00.777197+00	\N	8e54fda4-139e-40ea-be5b-421ae22d6871
+00000000-0000-0000-0000-000000000000	510	47xmi2qt7ajf	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 18:19:00.795623+00	2026-09-11 18:19:00.795623+00	hqabrimoz5ng	8e54fda4-139e-40ea-be5b-421ae22d6871
+00000000-0000-0000-0000-000000000000	511	maegucjlx56q	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 18:19:01.708757+00	2026-09-11 18:19:01.708757+00	\N	ef0927a8-6b85-45bb-a842-90a3d1e4f624
+00000000-0000-0000-0000-000000000000	512	bsu3zf6jewjv	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 18:19:02.871557+00	2026-09-11 18:19:02.871557+00	nles7qhwa5ua	84b430fe-2c6a-4621-9451-ddb6d2f808ae
+00000000-0000-0000-0000-000000000000	513	uha6gnxdf3m3	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 18:19:03.575995+00	2026-09-11 18:19:03.575995+00	\N	7f6b546a-2f6a-4b5d-b2f8-ddbf885c4b53
+00000000-0000-0000-0000-000000000000	514	hp4yanlv2jdw	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 18:20:25.90737+00	2026-09-11 18:20:25.90737+00	\N	86806982-de91-44f9-b89b-280e725e7c62
+00000000-0000-0000-0000-000000000000	515	k3y3yrlx4azw	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 18:20:43.124746+00	2026-09-11 18:20:43.124746+00	\N	ab143993-2a6a-4f2c-a12b-e774574f0357
+00000000-0000-0000-0000-000000000000	516	a5hwucfimsuu	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	f	2026-09-11 18:20:58.656785+00	2026-09-11 18:20:58.656785+00	\N	375380ab-f52d-4bb4-894b-d3faba012fbe
+00000000-0000-0000-0000-000000000000	506	m6uwjtcw7sd3	903d0e9f-6138-477c-9402-31e0ea7a6251	t	2026-09-11 15:07:25.335143+00	2026-09-11 18:23:38.472418+00	\N	709f1dc3-4d96-4626-b96f-3dafc18c94ab
+00000000-0000-0000-0000-000000000000	518	ds3cnqoetgs7	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 18:23:38.481565+00	2026-09-11 18:23:38.481565+00	m6uwjtcw7sd3	709f1dc3-4d96-4626-b96f-3dafc18c94ab
+00000000-0000-0000-0000-000000000000	519	64haz4wcafqa	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 18:23:39.293683+00	2026-09-11 18:23:39.293683+00	\N	1e916f58-271c-4e4b-b25e-533aa2a61f70
+00000000-0000-0000-0000-000000000000	520	xrrjljffe34f	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 18:23:39.300641+00	2026-09-11 18:23:39.300641+00	\N	8d6020d6-25dd-4390-959a-2d5a632cc2bb
+00000000-0000-0000-0000-000000000000	521	vlc5zdgapbdk	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 18:23:39.623079+00	2026-09-11 18:23:39.623079+00	\N	7cb5e5d8-e94c-4f64-ab07-da8e39329280
+00000000-0000-0000-0000-000000000000	522	nsmefyt2abfn	51a9566d-d142-4f07-b339-89f012525bef	t	2026-09-11 18:24:50.482517+00	2026-09-11 20:37:06.021597+00	\N	16c74870-bc66-4332-b187-7cec7f362955
+00000000-0000-0000-0000-000000000000	523	bgal5fu2ncci	51a9566d-d142-4f07-b339-89f012525bef	f	2026-09-11 20:37:06.037376+00	2026-09-11 20:37:06.037376+00	nsmefyt2abfn	16c74870-bc66-4332-b187-7cec7f362955
+00000000-0000-0000-0000-000000000000	517	mvlj7edlqqou	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-11 18:22:35.078863+00	2026-09-11 21:06:21.970818+00	\N	a64e3320-9ef1-4b65-80f0-03ef1e9ba4a5
+00000000-0000-0000-0000-000000000000	524	pobjyepcgvlv	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 21:06:21.985377+00	2026-09-11 21:06:21.985377+00	mvlj7edlqqou	a64e3320-9ef1-4b65-80f0-03ef1e9ba4a5
+00000000-0000-0000-0000-000000000000	525	creluidf6edh	51a9566d-d142-4f07-b339-89f012525bef	f	2026-09-11 21:06:22.618424+00	2026-09-11 21:06:22.618424+00	\N	0ea41969-37ae-430e-b25b-bbe04bfc26f4
+00000000-0000-0000-0000-000000000000	526	amizwo7cyeyo	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 21:06:30.125539+00	2026-09-11 21:06:30.125539+00	\N	cc354139-8143-45e0-8bf2-fc66773b620f
+00000000-0000-0000-0000-000000000000	527	3i5okhr2dr42	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 21:06:51.671427+00	2026-09-11 21:06:51.671427+00	\N	330234b6-070c-4041-8713-66f3c9f7124a
+00000000-0000-0000-0000-000000000000	508	z7od2aucahmr	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-11 16:52:14.260938+00	2026-09-11 21:10:25.299408+00	6rm7hfqnh5tn	f0167bfa-bf9f-4fd6-9c85-658c9c5ea406
+00000000-0000-0000-0000-000000000000	529	iymyqqho4k36	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 21:10:25.303504+00	2026-09-11 21:10:25.303504+00	z7od2aucahmr	f0167bfa-bf9f-4fd6-9c85-658c9c5ea406
+00000000-0000-0000-0000-000000000000	530	dsdbkdbucpe3	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 21:10:25.983165+00	2026-09-11 21:10:25.983165+00	\N	4478b3a5-d92b-43a1-b71e-6c7c337f7ecc
+00000000-0000-0000-0000-000000000000	531	ncbfx55fehds	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-11 21:11:14.914002+00	2026-09-11 21:11:14.914002+00	\N	0fd1dde7-7755-4ac5-9ab7-7f240459a870
+00000000-0000-0000-0000-000000000000	528	2le2mqzhafn2	903d0e9f-6138-477c-9402-31e0ea7a6251	t	2026-09-11 21:07:14.021369+00	2026-09-11 23:00:49.801881+00	\N	155a59cb-3f54-4062-9a00-f9b64b2f448f
+00000000-0000-0000-0000-000000000000	534	gkqjykqouybm	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-11 23:00:49.814333+00	2026-09-11 23:00:49.814333+00	2le2mqzhafn2	155a59cb-3f54-4062-9a00-f9b64b2f448f
+00000000-0000-0000-0000-000000000000	532	avktjobtipjr	51a9566d-d142-4f07-b339-89f012525bef	t	2026-09-11 21:11:35.457079+00	2026-09-11 23:01:06.742245+00	\N	e31a3b04-db5e-42e1-88e0-01741c070f10
+00000000-0000-0000-0000-000000000000	535	vi73mj4gtoq2	51a9566d-d142-4f07-b339-89f012525bef	f	2026-09-11 23:01:06.743921+00	2026-09-11 23:01:06.743921+00	avktjobtipjr	e31a3b04-db5e-42e1-88e0-01741c070f10
+00000000-0000-0000-0000-000000000000	536	a6we2diqmnza	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 23:01:07.555599+00	2026-09-11 23:01:07.555599+00	\N	499ed322-a284-4d51-8198-ac8314bebb92
+00000000-0000-0000-0000-000000000000	538	rqrofdox3pgv	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 23:01:25.084748+00	2026-09-11 23:01:25.084748+00	\N	61139365-9752-4fc3-858f-d2281f01ba47
+00000000-0000-0000-0000-000000000000	533	unpbp2d2z56j	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-11 21:38:42.469647+00	2026-09-11 23:31:14.351611+00	\N	c66fd7ca-44b4-4885-a365-83a0bf92a511
+00000000-0000-0000-0000-000000000000	540	skmispogpaa2	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-11 23:31:14.365456+00	2026-09-11 23:31:14.365456+00	unpbp2d2z56j	c66fd7ca-44b4-4885-a365-83a0bf92a511
+00000000-0000-0000-0000-000000000000	537	inkmcoibegzv	903d0e9f-6138-477c-9402-31e0ea7a6251	t	2026-09-11 23:01:12.202684+00	2026-09-12 00:04:22.589503+00	\N	106fd79c-7628-4237-b693-c6676d7aba39
+00000000-0000-0000-0000-000000000000	542	us6zykzo5grp	903d0e9f-6138-477c-9402-31e0ea7a6251	f	2026-09-12 00:04:22.609004+00	2026-09-12 00:04:22.609004+00	inkmcoibegzv	106fd79c-7628-4237-b693-c6676d7aba39
+00000000-0000-0000-0000-000000000000	539	yrcprsnsx6vk	cc322760-a401-4e42-be48-54fa2d80ce27	t	2026-09-11 23:01:38.862379+00	2026-09-12 00:05:56.655488+00	\N	9c2ecdb5-8591-49ad-bd15-c07eea574d92
+00000000-0000-0000-0000-000000000000	541	ksfym24rsbew	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-11 23:31:15.183551+00	2026-09-12 00:29:50.448927+00	\N	2a0019a8-e31a-47a2-af11-0e7167301d07
+00000000-0000-0000-0000-000000000000	543	c455j7mzooky	cc322760-a401-4e42-be48-54fa2d80ce27	t	2026-09-12 00:05:56.663773+00	2026-09-12 01:35:09.96959+00	yrcprsnsx6vk	9c2ecdb5-8591-49ad-bd15-c07eea574d92
+00000000-0000-0000-0000-000000000000	544	rq3eblwtsng7	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	t	2026-09-12 00:29:50.463493+00	2026-09-12 01:28:27.991565+00	ksfym24rsbew	2a0019a8-e31a-47a2-af11-0e7167301d07
+00000000-0000-0000-0000-000000000000	545	2ebygtyxhgmv	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	f	2026-09-12 01:28:28.010839+00	2026-09-12 01:28:28.010839+00	rq3eblwtsng7	2a0019a8-e31a-47a2-af11-0e7167301d07
+00000000-0000-0000-0000-000000000000	546	abrmclunm7bn	cc322760-a401-4e42-be48-54fa2d80ce27	f	2026-09-12 01:35:09.97618+00	2026-09-12 01:35:09.97618+00	c455j7mzooky	9c2ecdb5-8591-49ad-bd15-c07eea574d92
 \.
 
 
@@ -1021,7 +1231,7 @@ COPY "auth"."webauthn_credentials" ("id", "user_id", "credential_id", "public_ke
 --
 
 COPY "public"."admin_users" ("telegram_id", "role", "added_by", "active", "created_at") FROM stdin;
-896997567	super_admin	\N	t	2026-09-10 16:59:11.405611+00
+896997567	super_admin	\N	t	2026-09-11 13:49:05.725969+00
 \.
 
 
@@ -1030,7 +1240,14 @@ COPY "public"."admin_users" ("telegram_id", "role", "added_by", "active", "creat
 --
 
 COPY "public"."users" ("id", "telegram_id", "username", "kyc_status", "created_at", "status", "withdrawals_frozen") FROM stdin;
-aa07305f-a74a-4e6f-af56-e02e8e2119d5	0	Qedami House	pending	2026-09-10 16:59:11.405611+00	active	f
+b8846f2e-9103-4474-975e-09a24ec21727	0	Qedami House	pending	2026-09-11 13:49:05.725969+00	active	f
+29152f5a-bf99-4801-a283-8fe34ffb8174	7428247649	floren_tt	pending	2026-09-11 13:53:26.3833+00	active	f
+9c533de4-547f-4343-abe1-875970d15142	1725568865	gashaw_tekle	pending	2026-09-11 17:41:24.912376+00	active	f
+cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	7139428370	Dc_fitsum	pending	2026-09-11 18:19:03.647857+00	active	f
+51a9566d-d142-4f07-b339-89f012525bef	8864071319	user_8864071319	pending	2026-09-11 18:24:50.61166+00	active	f
+903d0e9f-6138-477c-9402-31e0ea7a6251	6736730495	Rahelrahelrahel	pending	2026-09-11 15:06:31.220733+00	active	f
+cc322760-a401-4e42-be48-54fa2d80ce27	7752096524	Oldmoneyclothing0	pending	2026-09-11 13:49:40.283542+00	active	f
+35669b50-bf3b-4459-a1d1-5d6af9f9d7da	896997567	AmaniGashaw0	pending	2026-09-11 13:52:51.728207+00	active	f
 \.
 
 
@@ -1071,6 +1288,80 @@ COPY "public"."contact_messages" ("id", "user_id", "message", "status", "created
 --
 
 COPY "public"."ledger_entries" ("id", "user_id", "amount", "type", "reference_id", "idempotency_key", "balance_after", "created_by", "created_at") FROM stdin;
+6ba38ab1-5465-422c-bce5-8b3cbdc8472e	cc322760-a401-4e42-be48-54fa2d80ce27	1000	deposit	4deeada9-be81-4af8-b8f8-e678da8d8d7e	deposit_4deeada9-be81-4af8-b8f8-e678da8d8d7e	1000	\N	2026-09-11 13:50:31.684716+00
+3c610eb1-e3c2-438b-bd4b-797484d89f84	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	1000	deposit	a5dc2b09-1c82-4191-a7e7-d5da22a40f46	deposit_a5dc2b09-1c82-4191-a7e7-d5da22a40f46	1000	\N	2026-09-11 13:53:06.049718+00
+14e2cffd-3180-4247-abc1-82bebdfa23c5	29152f5a-bf99-4801-a283-8fe34ffb8174	1000	deposit	618cad5b-5783-40e2-a60b-352c44b57fa8	deposit_618cad5b-5783-40e2-a60b-352c44b57fa8	1000	\N	2026-09-11 13:57:17.508057+00
+dd65a5ac-afa9-467f-b95c-733d598fd897	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	join_c52b8bb2-6edb-4ec8-83fe-61b9d2615f54_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	950	\N	2026-09-11 14:00:09.137365+00
+48c69390-66c6-4aa9-917b-94f1fb5e7412	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	join_c52b8bb2-6edb-4ec8-83fe-61b9d2615f54_cc322760-a401-4e42-be48-54fa2d80ce27	950	\N	2026-09-11 14:00:10.875339+00
+6f6bcd39-e4b9-491e-a474-5437c8ab702e	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	refund_c52b8bb2-6edb-4ec8-83fe-61b9d2615f54_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	1000	\N	2026-09-11 14:05:25.492725+00
+815e02b3-8aac-4714-8be7-73ffbdc2e67e	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	refund_c52b8bb2-6edb-4ec8-83fe-61b9d2615f54_cc322760-a401-4e42-be48-54fa2d80ce27	1000	\N	2026-09-11 14:05:25.492725+00
+9017628f-3e28-46bc-aed8-9a334b20af97	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	join_1bee1168-b3ad-4d71-aca7-9a6ae0eef753_cc322760-a401-4e42-be48-54fa2d80ce27	950	\N	2026-09-11 14:15:05.056008+00
+ae064f2a-3924-4fd7-b0d1-af452b6e58c8	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	join_1bee1168-b3ad-4d71-aca7-9a6ae0eef753_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	950	\N	2026-09-11 14:15:09.42453+00
+e0c75acb-6b5b-43f5-8be1-73294fb85755	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	refund_1bee1168-b3ad-4d71-aca7-9a6ae0eef753_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	1000	\N	2026-09-11 14:20:09.610745+00
+7d5ea305-3834-4358-b2a2-ed9bd1fc5bcc	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	refund_1bee1168-b3ad-4d71-aca7-9a6ae0eef753_cc322760-a401-4e42-be48-54fa2d80ce27	1000	\N	2026-09-11 14:20:09.610745+00
+deef3bc8-8d4f-4558-8b0e-f80c51e08251	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	39ca87c9-54f4-44a6-a79c-2333e9f78970	join_39ca87c9-54f4-44a6-a79c-2333e9f78970_cc322760-a401-4e42-be48-54fa2d80ce27	950	\N	2026-09-11 14:21:07.922592+00
+cb51266d-8380-463d-838a-3ebb20f6d81d	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	39ca87c9-54f4-44a6-a79c-2333e9f78970	join_39ca87c9-54f4-44a6-a79c-2333e9f78970_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	950	\N	2026-09-11 14:21:10.161834+00
+396d5df1-d0c0-4254-9fc0-fcbe9b0f27b1	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	53f59b76-c822-4cec-8857-c4a5aa0d0f26	join_53f59b76-c822-4cec-8857-c4a5aa0d0f26_cc322760-a401-4e42-be48-54fa2d80ce27	900	\N	2026-09-11 14:22:05.463649+00
+5edaa6be-b086-4057-b280-6e8d4dea9c3d	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	53f59b76-c822-4cec-8857-c4a5aa0d0f26	refund_53f59b76-c822-4cec-8857-c4a5aa0d0f26_cc322760-a401-4e42-be48-54fa2d80ce27	950	\N	2026-09-11 14:25:01.520364+00
+e281d382-b27b-447e-ad7d-c5bbfd6c6fb0	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	1e7139e1-cbca-4335-880d-e6ace6e15b0f	join_1e7139e1-cbca-4335-880d-e6ace6e15b0f_cc322760-a401-4e42-be48-54fa2d80ce27	900	\N	2026-09-11 14:28:22.814021+00
+b4a0515a-7724-4a9e-9851-06b2057fa308	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	1e7139e1-cbca-4335-880d-e6ace6e15b0f	refund_1e7139e1-cbca-4335-880d-e6ace6e15b0f_cc322760-a401-4e42-be48-54fa2d80ce27	950	\N	2026-09-11 14:30:01.272853+00
+bc957a17-7d60-41d6-a511-eee3f75630fe	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	7b445b49-5b68-4816-8c88-6239b6163d36	join_7b445b49-5b68-4816-8c88-6239b6163d36_cc322760-a401-4e42-be48-54fa2d80ce27	900	\N	2026-09-11 14:31:39.710826+00
+5c567612-83a8-4479-a798-918135134133	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	7b445b49-5b68-4816-8c88-6239b6163d36	join_7b445b49-5b68-4816-8c88-6239b6163d36_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	900	\N	2026-09-11 14:32:06.097611+00
+eea6120b-a3c5-4047-80ff-984a89b5bb76	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	9d6f7059-c6b6-4218-add2-f821846d524d	join_9d6f7059-c6b6-4218-add2-f821846d524d_cc322760-a401-4e42-be48-54fa2d80ce27	850	\N	2026-09-11 14:37:27.764855+00
+a3476d61-51e2-414b-993a-55abc7e7d38e	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	9d6f7059-c6b6-4218-add2-f821846d524d	join_9d6f7059-c6b6-4218-add2-f821846d524d_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 14:37:28.686455+00
+9cc35a0a-076d-4a6f-826b-5b771a653205	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	986d615f-7ad1-4cc3-b592-589136837cdf	join_986d615f-7ad1-4cc3-b592-589136837cdf_cc322760-a401-4e42-be48-54fa2d80ce27	800	\N	2026-09-11 14:51:05.69399+00
+3232fbea-366c-4ac0-8bba-bb0fbc07e229	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	986d615f-7ad1-4cc3-b592-589136837cdf	join_986d615f-7ad1-4cc3-b592-589136837cdf_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 14:51:23.762568+00
+831387f5-5b09-4d3f-b71b-afbb55cd8640	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	986d615f-7ad1-4cc3-b592-589136837cdf	refund_986d615f-7ad1-4cc3-b592-589136837cdf_cc322760-a401-4e42-be48-54fa2d80ce27	850	\N	2026-09-11 14:55:08.445927+00
+52137e02-173a-49f6-8d2a-2fea39fcdc10	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	986d615f-7ad1-4cc3-b592-589136837cdf	refund_986d615f-7ad1-4cc3-b592-589136837cdf_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 14:55:08.445927+00
+cced32bc-178f-4768-afd8-f97b87220da1	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	85775b80-1a18-4ac3-8ea4-fbacadeee10a	join_85775b80-1a18-4ac3-8ea4-fbacadeee10a_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 14:55:41.2494+00
+168c34aa-71a9-4ec0-ac11-12cb50076161	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	85775b80-1a18-4ac3-8ea4-fbacadeee10a	join_85775b80-1a18-4ac3-8ea4-fbacadeee10a_cc322760-a401-4e42-be48-54fa2d80ce27	800	\N	2026-09-11 14:55:46.306377+00
+ed856003-6946-4b0e-a3e0-29b00055745a	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	85775b80-1a18-4ac3-8ea4-fbacadeee10a	refund_85775b80-1a18-4ac3-8ea4-fbacadeee10a_cc322760-a401-4e42-be48-54fa2d80ce27	850	\N	2026-09-11 15:00:08.747317+00
+a420d7c3-4b23-4f6d-8fc5-39dec135cf0b	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	85775b80-1a18-4ac3-8ea4-fbacadeee10a	refund_85775b80-1a18-4ac3-8ea4-fbacadeee10a_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 15:00:08.747317+00
+ec058668-25c8-4e11-96bc-4df420438536	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	join_34cbd223-cbba-46d3-ba34-778ca5e9ecb1_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 15:00:21.743769+00
+b1a9a1fa-011c-462c-a716-e83c4c0f64ae	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	join_34cbd223-cbba-46d3-ba34-778ca5e9ecb1_cc322760-a401-4e42-be48-54fa2d80ce27	800	\N	2026-09-11 15:00:22.050852+00
+707e9de1-5829-4564-bda8-7f717a599a26	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	refund_34cbd223-cbba-46d3-ba34-778ca5e9ecb1_cc322760-a401-4e42-be48-54fa2d80ce27	850	\N	2026-09-11 15:06:06.473149+00
+fb55c134-4113-42be-800c-f80820b9e3a4	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	refund_34cbd223-cbba-46d3-ba34-778ca5e9ecb1_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 15:06:06.473149+00
+c059d709-4e3a-4c17-b5f0-a6d146c31a27	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	22829e75-d5a0-45f0-9944-e4099fd6797d	join_22829e75-d5a0-45f0-9944-e4099fd6797d_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 18:19:50.350764+00
+82049e52-58a3-4bbe-80c8-5eeca4a88e1c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	22829e75-d5a0-45f0-9944-e4099fd6797d	refund_22829e75-d5a0-45f0-9944-e4099fd6797d_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 18:20:08.077029+00
+b9dd5eba-d5f4-4b2e-9038-7cc62710a439	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	ad24d727-a08c-4644-a8c9-f7b46d41fbe7	join_ad24d727-a08c-4644-a8c9-f7b46d41fbe7_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 18:23:03.275088+00
+b66d69f4-ed5f-4651-bd75-23d218d3dfbb	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	ad24d727-a08c-4644-a8c9-f7b46d41fbe7	refund_ad24d727-a08c-4644-a8c9-f7b46d41fbe7_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 18:25:10.016857+00
+56a61bc3-5b76-4cec-b191-b88f93e8ba82	51a9566d-d142-4f07-b339-89f012525bef	1000	deposit	75d83e0f-7dc5-48ff-9b29-c98a99633b20	deposit_75d83e0f-7dc5-48ff-9b29-c98a99633b20	1000	\N	2026-09-11 18:48:00.945312+00
+ed5adb7c-3b9a-4c57-ad4f-2cb0a55e5180	903d0e9f-6138-477c-9402-31e0ea7a6251	1000	deposit	a1ba1ec9-4aba-4b17-901e-19475bc8a98f	deposit_a1ba1ec9-4aba-4b17-901e-19475bc8a98f	1000	\N	2026-09-11 21:07:07.344853+00
+bd666741-b2b5-4387-a003-1172f48dac06	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	fb0646ed-6344-4e7c-b803-b2757657e879	join_fb0646ed-6344-4e7c-b803-b2757657e879_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 21:10:59.628371+00
+65334d93-cdad-4a00-8659-a1e5dc47aaf9	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	fb0646ed-6344-4e7c-b803-b2757657e879	join_fb0646ed-6344-4e7c-b803-b2757657e879_cc322760-a401-4e42-be48-54fa2d80ce27	800	\N	2026-09-11 21:11:18.405441+00
+23f7d9d3-8511-4634-b056-aa6ec8865fb1	903d0e9f-6138-477c-9402-31e0ea7a6251	-50	entry_fee	fb0646ed-6344-4e7c-b803-b2757657e879	join_fb0646ed-6344-4e7c-b803-b2757657e879_903d0e9f-6138-477c-9402-31e0ea7a6251	950	\N	2026-09-11 21:11:19.799781+00
+e7d7d4f4-bfe1-4c81-b36a-8666f2eae072	51a9566d-d142-4f07-b339-89f012525bef	-50	entry_fee	fb0646ed-6344-4e7c-b803-b2757657e879	join_fb0646ed-6344-4e7c-b803-b2757657e879_51a9566d-d142-4f07-b339-89f012525bef	950	\N	2026-09-11 21:11:44.269888+00
+6870976f-3481-415f-9122-5a3bc1c8c94d	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	fb0646ed-6344-4e7c-b803-b2757657e879	refund_fb0646ed-6344-4e7c-b803-b2757657e879_cc322760-a401-4e42-be48-54fa2d80ce27	850	\N	2026-09-11 21:16:20.234734+00
+37e2241f-5386-4129-81b0-ea317ca0612c	903d0e9f-6138-477c-9402-31e0ea7a6251	50	refund	fb0646ed-6344-4e7c-b803-b2757657e879	refund_fb0646ed-6344-4e7c-b803-b2757657e879_903d0e9f-6138-477c-9402-31e0ea7a6251	1000	\N	2026-09-11 21:16:20.234734+00
+c891ae93-7035-4a36-9f8b-06ef0075d7db	51a9566d-d142-4f07-b339-89f012525bef	50	refund	fb0646ed-6344-4e7c-b803-b2757657e879	refund_fb0646ed-6344-4e7c-b803-b2757657e879_51a9566d-d142-4f07-b339-89f012525bef	1000	\N	2026-09-11 21:16:20.234734+00
+4797c246-da74-43a4-b44c-8389fe62e0be	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	fb0646ed-6344-4e7c-b803-b2757657e879	refund_fb0646ed-6344-4e7c-b803-b2757657e879_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 21:16:20.234734+00
+09b66edb-ca40-4c37-8cd2-56132fb86223	51a9566d-d142-4f07-b339-89f012525bef	-50	entry_fee	c8d53446-b732-4dd8-8518-40f18b55bcde	join_c8d53446-b732-4dd8-8518-40f18b55bcde_51a9566d-d142-4f07-b339-89f012525bef	950	\N	2026-09-11 21:18:35.587604+00
+e7e9fad1-259b-45a9-92a8-10ef446e9662	903d0e9f-6138-477c-9402-31e0ea7a6251	-50	entry_fee	c8d53446-b732-4dd8-8518-40f18b55bcde	join_c8d53446-b732-4dd8-8518-40f18b55bcde_903d0e9f-6138-477c-9402-31e0ea7a6251	950	\N	2026-09-11 21:18:41.833953+00
+dd448325-8b28-421c-8129-b1ba012ea458	51a9566d-d142-4f07-b339-89f012525bef	50	refund	c8d53446-b732-4dd8-8518-40f18b55bcde	refund_c8d53446-b732-4dd8-8518-40f18b55bcde_51a9566d-d142-4f07-b339-89f012525bef	1000	\N	2026-09-11 21:24:41.598376+00
+730ea647-deb6-4615-af8b-97d213730837	903d0e9f-6138-477c-9402-31e0ea7a6251	50	refund	c8d53446-b732-4dd8-8518-40f18b55bcde	refund_c8d53446-b732-4dd8-8518-40f18b55bcde_903d0e9f-6138-477c-9402-31e0ea7a6251	1000	\N	2026-09-11 21:24:41.598376+00
+14eb8a68-eb3a-4e2f-940d-1b56f34bae7f	51a9566d-d142-4f07-b339-89f012525bef	-50	entry_fee	939fb71a-befc-4fa8-b349-cb349d488dac	join_939fb71a-befc-4fa8-b349-cb349d488dac_51a9566d-d142-4f07-b339-89f012525bef	950	\N	2026-09-11 21:30:53.891012+00
+a1eb7dd7-e0e5-4ed5-9089-2a09a6cc1db5	903d0e9f-6138-477c-9402-31e0ea7a6251	-50	entry_fee	939fb71a-befc-4fa8-b349-cb349d488dac	join_939fb71a-befc-4fa8-b349-cb349d488dac_903d0e9f-6138-477c-9402-31e0ea7a6251	950	\N	2026-09-11 21:31:23.115835+00
+dbc9a2ad-4ca9-404b-9c19-8d027a3b6c22	51a9566d-d142-4f07-b339-89f012525bef	50	refund	939fb71a-befc-4fa8-b349-cb349d488dac	refund_939fb71a-befc-4fa8-b349-cb349d488dac_51a9566d-d142-4f07-b339-89f012525bef	1000	\N	2026-09-11 21:35:12.497394+00
+30fee81f-37b9-45a7-ba30-b56c433b3f9e	903d0e9f-6138-477c-9402-31e0ea7a6251	50	refund	939fb71a-befc-4fa8-b349-cb349d488dac	refund_939fb71a-befc-4fa8-b349-cb349d488dac_903d0e9f-6138-477c-9402-31e0ea7a6251	1000	\N	2026-09-11 21:35:12.497394+00
+7d8bb033-94f5-4bfa-8110-b545a2bc05ae	51a9566d-d142-4f07-b339-89f012525bef	-50	entry_fee	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	join_4e8f439a-45ac-4a3a-ba61-2b01cc5093e4_51a9566d-d142-4f07-b339-89f012525bef	950	\N	2026-09-11 21:38:15.506217+00
+741db6b6-804f-434b-a481-66279e86f7b1	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	join_4e8f439a-45ac-4a3a-ba61-2b01cc5093e4_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 21:38:54.254527+00
+5783034c-43fd-44e8-9884-0a69a035f1b0	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	refund_4e8f439a-45ac-4a3a-ba61-2b01cc5093e4_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 21:40:19.854555+00
+7cdb71a2-ffc2-45ba-b903-e636bb785887	51a9566d-d142-4f07-b339-89f012525bef	50	refund	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	refund_4e8f439a-45ac-4a3a-ba61-2b01cc5093e4_51a9566d-d142-4f07-b339-89f012525bef	1000	\N	2026-09-11 21:40:19.854555+00
+f067a0fc-3be5-46a7-b96d-fced9c103a80	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	da113afe-8419-46d9-8ad1-19ab6095fb9b	join_da113afe-8419-46d9-8ad1-19ab6095fb9b_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 21:42:36.610592+00
+0dc1f090-0806-4fc0-bece-d2047a50b9c6	51a9566d-d142-4f07-b339-89f012525bef	-50	entry_fee	da113afe-8419-46d9-8ad1-19ab6095fb9b	join_da113afe-8419-46d9-8ad1-19ab6095fb9b_51a9566d-d142-4f07-b339-89f012525bef	950	\N	2026-09-11 21:42:39.007591+00
+eaf7eff3-eec5-46c1-9825-dc209fa75141	903d0e9f-6138-477c-9402-31e0ea7a6251	-50	entry_fee	da113afe-8419-46d9-8ad1-19ab6095fb9b	join_da113afe-8419-46d9-8ad1-19ab6095fb9b_903d0e9f-6138-477c-9402-31e0ea7a6251	950	\N	2026-09-11 21:44:20.704454+00
+e51f5844-13de-412d-b326-8f6a2ba140a5	903d0e9f-6138-477c-9402-31e0ea7a6251	50	refund	da113afe-8419-46d9-8ad1-19ab6095fb9b	refund_da113afe-8419-46d9-8ad1-19ab6095fb9b_903d0e9f-6138-477c-9402-31e0ea7a6251	1000	\N	2026-09-11 21:46:23.415412+00
+51bf74e2-842d-4fe9-a480-cffb073eddc0	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	da113afe-8419-46d9-8ad1-19ab6095fb9b	refund_da113afe-8419-46d9-8ad1-19ab6095fb9b_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	850	\N	2026-09-11 21:46:23.415412+00
+c8be7d4e-5118-4013-8c6f-179696a42373	51a9566d-d142-4f07-b339-89f012525bef	50	refund	da113afe-8419-46d9-8ad1-19ab6095fb9b	refund_da113afe-8419-46d9-8ad1-19ab6095fb9b_51a9566d-d142-4f07-b339-89f012525bef	1000	\N	2026-09-11 21:46:23.415412+00
+e40ffb9d-613c-4947-88a9-1865f5e7c9ab	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	e3d8e80b-824f-450e-aa9a-95859f8361ba	join_e3d8e80b-824f-450e-aa9a-95859f8361ba_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 23:01:12.584275+00
+693cb3d8-b6c5-4fa8-99b6-64de273071b8	903d0e9f-6138-477c-9402-31e0ea7a6251	-50	entry_fee	e3d8e80b-824f-450e-aa9a-95859f8361ba	join_e3d8e80b-824f-450e-aa9a-95859f8361ba_903d0e9f-6138-477c-9402-31e0ea7a6251	950	\N	2026-09-11 23:01:14.734581+00
+6624ca11-0b65-4ecd-90d3-dfc46c5e889b	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	e3d8e80b-824f-450e-aa9a-95859f8361ba	join_e3d8e80b-824f-450e-aa9a-95859f8361ba_cc322760-a401-4e42-be48-54fa2d80ce27	800	\N	2026-09-11 23:01:50.007571+00
+e93fc195-a20a-4437-bdd8-8d2aad707d7c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	-50	entry_fee	84fffab7-06d2-499e-a5bb-074149aaa421	join_84fffab7-06d2-499e-a5bb-074149aaa421_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	750	\N	2026-09-11 23:31:22.021703+00
+290fdc34-4a71-43fc-98ce-ada1fccfcfd6	cc322760-a401-4e42-be48-54fa2d80ce27	-50	entry_fee	84fffab7-06d2-499e-a5bb-074149aaa421	join_84fffab7-06d2-499e-a5bb-074149aaa421_cc322760-a401-4e42-be48-54fa2d80ce27	750	\N	2026-09-11 23:31:36.942208+00
+77fc7c5a-4d27-4553-904f-980fddd48570	903d0e9f-6138-477c-9402-31e0ea7a6251	-50	entry_fee	84fffab7-06d2-499e-a5bb-074149aaa421	join_84fffab7-06d2-499e-a5bb-074149aaa421_903d0e9f-6138-477c-9402-31e0ea7a6251	900	\N	2026-09-11 23:34:42.099283+00
+6c43e328-5128-4fea-a81c-2f521d6a335d	cc322760-a401-4e42-be48-54fa2d80ce27	50	refund	84fffab7-06d2-499e-a5bb-074149aaa421	refund_84fffab7-06d2-499e-a5bb-074149aaa421_cc322760-a401-4e42-be48-54fa2d80ce27	800	\N	2026-09-11 23:36:34.437663+00
+f35c1ff1-0feb-4802-98fb-6b532c56c739	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	50	refund	84fffab7-06d2-499e-a5bb-074149aaa421	refund_84fffab7-06d2-499e-a5bb-074149aaa421_35669b50-bf3b-4459-a1d1-5d6af9f9d7da	800	\N	2026-09-11 23:36:34.437663+00
+53af3958-e5c5-407e-a3b1-c4400f4150ba	903d0e9f-6138-477c-9402-31e0ea7a6251	50	refund	84fffab7-06d2-499e-a5bb-074149aaa421	refund_84fffab7-06d2-499e-a5bb-074149aaa421_903d0e9f-6138-477c-9402-31e0ea7a6251	950	\N	2026-09-11 23:36:34.437663+00
 \.
 
 
@@ -1087,222 +1378,270 @@ COPY "public"."lockdown_history" ("id", "action", "admin_id", "reason", "created
 --
 
 COPY "public"."matches" ("id", "game_type", "entry_fee", "pool_size", "scheduled_start", "status", "min_players", "server_seed", "seed_hash", "revealed_seed_at", "created_at", "go_green_ms", "reminder_sent") FROM stdin;
-7c21c8a9-ae77-4f27-a7d5-c57f351cfed0	reaction_tap	50.00	50	2026-09-10 17:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-eca0e56b-2552-4b20-b0a9-339376bd0f84	holdout	50.00	50	2026-09-10 17:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-721cc597-092f-41d6-af19-15828851e8c2	reaction_tap	50.00	50	2026-09-10 17:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-647d3bb5-c118-46d7-9f4c-806c6ddb15f4	holdout	50.00	50	2026-09-10 17:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-ce60f0d2-98e8-46d5-a37e-f50b8493c0d8	reaction_tap	50.00	50	2026-09-10 17:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-a5150b45-f715-427c-a49f-93c2daffa908	holdout	50.00	50	2026-09-10 17:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-6e13c958-8be2-4abb-9057-6e2495d3feea	reaction_tap	50.00	50	2026-09-10 17:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-e3de4308-69d3-446a-a824-e595abacc511	holdout	50.00	50	2026-09-10 17:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-29658eef-2bb6-45c2-a673-67cbead15590	reaction_tap	50.00	50	2026-09-10 17:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-9f356c19-8236-449f-80f5-1b39cd9f1574	holdout	50.00	50	2026-09-10 17:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-6c4f6df6-6a3b-4b95-830f-04c0ce15b1ad	reaction_tap	50.00	50	2026-09-10 17:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-d7666596-b456-4ae3-8dcf-9f82562df90b	holdout	50.00	50	2026-09-10 17:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-bf4969af-16ec-477f-8e35-aac643a7fb87	reaction_tap	50.00	50	2026-09-10 17:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-91fe3e12-a9cd-4fe2-ac51-33af66eab020	holdout	50.00	50	2026-09-10 17:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-39a75278-c0ea-4324-a24e-ccff1e81eab9	reaction_tap	50.00	50	2026-09-10 17:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-ccc52ead-38d5-488f-97fe-0f9bc9b7a73f	holdout	50.00	50	2026-09-10 17:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-26ae4cc7-2833-4e65-8aac-7bd044e1170c	reaction_tap	50.00	50	2026-09-10 17:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-90a1482c-b47b-431f-86e5-7a535fedc28a	holdout	50.00	50	2026-09-10 17:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-50378597-f975-4a93-8f33-ca3ea27f9fd6	reaction_tap	50.00	50	2026-09-10 17:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-7f8ede2b-b6c7-4c3f-8a78-e36071256090	holdout	50.00	50	2026-09-10 17:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-31baaa92-a259-4cd2-9d28-070195ccd225	reaction_tap	50.00	50	2026-09-10 17:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-0f05ad41-2b13-48f1-9302-28fc464a261a	holdout	50.00	50	2026-09-10 17:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-9489e041-464f-467d-a41c-72374b531ae6	reaction_tap	50.00	50	2026-09-10 18:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-9cf7f58a-90d5-46f1-97a3-6a9ba2767370	holdout	50.00	50	2026-09-10 18:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 17:00:06.002256+00	\N	f
-70d9a0a6-cda8-40a4-9797-b6eebcb5f383	reaction_tap	50.00	50	2026-09-10 18:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-20cfe5a9-d126-4af0-bebb-7ee2bef9c6f7	holdout	50.00	50	2026-09-10 18:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-e91224ed-0f4d-41c8-831b-2a4a58f82faa	reaction_tap	50.00	50	2026-09-10 18:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-0826ac84-1592-4763-b3a3-26714ee3f28b	holdout	50.00	50	2026-09-10 18:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-62e3cdd3-c56a-4efe-a916-785ec14a17d4	reaction_tap	50.00	50	2026-09-10 18:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-85c89a0d-62f0-440a-be82-46efd07207e5	holdout	50.00	50	2026-09-10 18:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-ba57f754-0d81-486c-a0b5-9adbf64dd6e1	reaction_tap	50.00	50	2026-09-10 18:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-88e000e1-f665-44a7-b53e-d7b2dcb5be53	holdout	50.00	50	2026-09-10 18:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-837ff5df-a7ea-4ef0-8410-dc4523d3b6a9	reaction_tap	50.00	50	2026-09-10 18:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-d1dcce5b-3f49-48a4-a30e-920a9068b5e1	holdout	50.00	50	2026-09-10 18:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-b796587d-53dc-4bc6-8397-bce1d0e44c96	reaction_tap	50.00	50	2026-09-10 18:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-a6d025c6-c476-40e4-82e4-9e42e7c04524	holdout	50.00	50	2026-09-10 18:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-51947be5-27ba-4437-96b9-39f641cf1c2f	reaction_tap	50.00	50	2026-09-10 18:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-eee2baad-7780-4005-9487-c918a5e0aee5	holdout	50.00	50	2026-09-10 18:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-3c70a1ce-508c-43b1-b219-9b306ed9f941	reaction_tap	50.00	50	2026-09-10 18:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-fa91defc-c9f8-47f2-9cfd-9b1eb5c43eb9	holdout	50.00	50	2026-09-10 18:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-70a8a2d5-d5f7-41b5-806a-0c2029a13dba	reaction_tap	50.00	50	2026-09-10 18:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-66d58a64-015f-49a7-b92f-33cf4699bbaa	holdout	50.00	50	2026-09-10 18:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-1f7a97ec-d2c9-49f5-bc01-28ab9088a9f0	reaction_tap	50.00	50	2026-09-10 18:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-3afd6531-e4dd-46a9-aeba-dc32adccb92f	holdout	50.00	50	2026-09-10 18:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-48ad3fc7-7a35-48cf-a37f-1c97fa76f635	reaction_tap	50.00	50	2026-09-10 18:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-210f55af-b0c6-4574-a8d5-c2cf2ed3163b	holdout	50.00	50	2026-09-10 18:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-45b98d48-f2c0-4b69-a446-029f8cd5d754	reaction_tap	50.00	50	2026-09-10 19:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-be182c04-f2f6-4adb-b960-37fbd2355dcc	holdout	50.00	50	2026-09-10 19:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 18:00:00.240355+00	\N	f
-485e3ac0-68f9-4860-9669-4a12da791435	reaction_tap	50.00	50	2026-09-10 19:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-52613a37-d77c-4982-8e56-cdc6702679f8	holdout	50.00	50	2026-09-10 19:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-8db309f0-1be2-4a30-9734-8e6825db2d9a	reaction_tap	50.00	50	2026-09-10 19:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-06dbca0c-527d-410e-9d98-7c16a24a8c8b	holdout	50.00	50	2026-09-10 19:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-4c9f85a9-f6fa-425d-afa6-9e99846076d7	reaction_tap	50.00	50	2026-09-10 19:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-027357be-3492-4b99-bd9b-af7938d4ec89	holdout	50.00	50	2026-09-10 19:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-a9875f6a-a378-4c89-8e9f-7bb81e4dbd77	reaction_tap	50.00	50	2026-09-10 19:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-b0a84d55-fb24-4a30-a606-6060998701e0	holdout	50.00	50	2026-09-10 19:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-9b2eb74e-d7d2-48fc-8c84-8136df728089	reaction_tap	50.00	50	2026-09-10 19:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-890cce8f-fb7c-45fd-a5bc-0196cbb9c440	holdout	50.00	50	2026-09-10 19:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-1f2487c5-9022-4b8e-a42c-11517e579683	reaction_tap	50.00	50	2026-09-10 19:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-42bbe63f-a189-4539-b5b4-f53753e1f8ac	holdout	50.00	50	2026-09-10 19:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-aca51e62-7d86-4af2-a7a3-54c017ca1a49	reaction_tap	50.00	50	2026-09-10 19:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-6da1ef93-a737-4b38-b452-da1af8e5adaf	holdout	50.00	50	2026-09-10 19:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-2b0b61ec-bfb2-4af4-902e-731e98e1d8de	reaction_tap	50.00	50	2026-09-10 19:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-faed2df2-1a01-41c5-8e7f-4b7e13eb48bd	holdout	50.00	50	2026-09-10 19:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-a8880af1-0b30-47d5-a36b-42698fe30f6e	reaction_tap	50.00	50	2026-09-10 19:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-8f53e0ef-0be5-4740-b169-d8f4cdcc1171	holdout	50.00	50	2026-09-10 19:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-f024d1e4-b08e-43de-9c07-3ee3187ea253	reaction_tap	50.00	50	2026-09-10 19:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-d04a87d2-a554-46b1-b4c1-af58d2f40970	holdout	50.00	50	2026-09-10 19:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-440ca3b7-5401-41c6-b9e0-35802fb81d0e	reaction_tap	50.00	50	2026-09-10 19:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-eb48bb67-273d-4dac-bae7-265b55c6df06	holdout	50.00	50	2026-09-10 19:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-fa62ac26-db15-4d42-98a0-40ee58795b33	reaction_tap	50.00	50	2026-09-10 20:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-7935be26-911f-44af-8567-9f4b72d8db3f	holdout	50.00	50	2026-09-10 20:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 19:00:05.474296+00	\N	f
-279d139f-ad48-4ae2-b6e8-eba79571cc5e	holdout	50.00	50	2026-09-10 20:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-ff821fea-31ae-492e-ba0b-ca9fa8a8a343	reaction_tap	50.00	50	2026-09-10 20:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-3ba4f4e7-6896-460b-848a-b4f9bce40dd4	reaction_tap	50.00	50	2026-09-10 20:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-d705350e-b253-4720-8b41-b4016c3e6bfc	holdout	50.00	50	2026-09-10 20:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-7e71ad3b-aa13-4624-8e60-a281cc099d15	reaction_tap	50.00	50	2026-09-10 20:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-bf2f30df-2032-4120-80ae-fdaae21f7a95	holdout	50.00	50	2026-09-10 20:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-da1c3cb7-c36e-4236-89c0-e860b385d503	reaction_tap	50.00	50	2026-09-10 20:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-488e5b8e-6ad9-4b7f-8dd2-b01c10ee54a6	holdout	50.00	50	2026-09-10 20:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-97889c22-e0cd-40dd-928e-1ff8dba2487d	reaction_tap	50.00	50	2026-09-10 20:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-bebbc806-0491-4d16-adba-77ac316906f4	holdout	50.00	50	2026-09-10 20:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-a6043394-6587-42e6-b45b-8dfb0f395cdc	reaction_tap	50.00	50	2026-09-10 20:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-4e8dbe10-cb77-4772-87c6-1a88e713fa93	holdout	50.00	50	2026-09-10 20:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-4442de18-acbf-4b4e-b6c2-5e820d1d0e35	reaction_tap	50.00	50	2026-09-10 20:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-2e175a75-e5bb-491a-92c4-0f8a0080f0f8	holdout	50.00	50	2026-09-10 20:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-72b05725-6e7d-4996-b049-4e50d8d21eb9	reaction_tap	50.00	50	2026-09-10 20:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-4ea4502f-3e85-4215-aaff-0e1335682b76	holdout	50.00	50	2026-09-10 20:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-d051fc40-7ee7-4f01-812a-ab8451067b91	reaction_tap	50.00	50	2026-09-10 20:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-c95d18c5-6383-4f41-89ee-282b980a9ee7	holdout	50.00	50	2026-09-10 20:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-a5caea09-0aec-4e17-b292-b906ffc6fc14	reaction_tap	50.00	50	2026-09-10 20:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-9de922e2-a495-414a-85e0-0e5a01a30782	holdout	50.00	50	2026-09-10 20:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-4083cb33-5bc1-47ce-80e0-8de290d478e9	reaction_tap	50.00	50	2026-09-10 20:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-6a4690a0-7d83-48cc-a6c7-459e178b5331	holdout	50.00	50	2026-09-10 20:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-5773e749-fec7-48cc-8794-617facd636d7	reaction_tap	50.00	50	2026-09-10 21:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-b78f6d1c-ed35-43ca-816a-9e96820efd8f	holdout	50.00	50	2026-09-10 21:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 20:00:02.224621+00	\N	f
-d3e286c5-4c7f-4dd8-b480-5e055ddeece5	reaction_tap	50.00	50	2026-09-10 21:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-7731e425-8ead-4f37-b350-67fa7fd9de96	holdout	50.00	50	2026-09-10 21:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-269e7efe-2301-4f3a-8e42-e2e301492e67	reaction_tap	50.00	50	2026-09-10 21:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-3955161d-7788-4365-8d22-876a81f094a9	holdout	50.00	50	2026-09-10 21:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-6fd86473-1555-407e-8af1-2d4b2859e4ad	reaction_tap	50.00	50	2026-09-10 21:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-722b7a84-b299-4699-bf19-29d00903e077	holdout	50.00	50	2026-09-10 21:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-61a876b8-d079-4c47-85f3-c8e7baee57fc	reaction_tap	50.00	50	2026-09-10 21:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-fe085544-ec29-4128-bea3-fa65ae307871	holdout	50.00	50	2026-09-10 21:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-acb47123-c487-487e-be57-bfc913eacc69	reaction_tap	50.00	50	2026-09-10 21:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-00196611-c3fa-443f-84f4-56f8e6e0ccd5	holdout	50.00	50	2026-09-10 21:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-c983eb28-1c9b-4dbc-800f-c56807be0551	reaction_tap	50.00	50	2026-09-10 21:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-1b20c91c-b812-419a-9838-c263e9d315d5	holdout	50.00	50	2026-09-10 21:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-5888374a-401c-4c4d-a230-d5550793b800	reaction_tap	50.00	50	2026-09-10 21:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-53c0222a-3a7c-45e9-a4aa-66ce74d3f6c5	holdout	50.00	50	2026-09-10 21:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-38abf1b4-4cbd-44c4-a697-00bd0e09de50	reaction_tap	50.00	50	2026-09-10 21:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-60ea768a-649d-4a79-b829-22bfb5a1d892	holdout	50.00	50	2026-09-10 21:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-f049034c-0755-40f4-a3e3-4379840b5d7d	reaction_tap	50.00	50	2026-09-10 21:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-b526bdf0-63a2-4e02-b46d-7765926debcf	holdout	50.00	50	2026-09-10 21:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-fda5d128-9867-4c61-83b5-f46574a974e1	reaction_tap	50.00	50	2026-09-10 21:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-1920e17c-9a39-4a1e-aa22-be8a5baef3ff	holdout	50.00	50	2026-09-10 21:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-59077575-0e87-4900-8197-9d6b02ef99ca	reaction_tap	50.00	50	2026-09-10 21:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-e3d5d7cb-2f3d-4ee4-9990-e3a192055d68	holdout	50.00	50	2026-09-10 21:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-d217a0ce-974a-41f8-a186-d790a5956f48	reaction_tap	50.00	50	2026-09-10 22:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-07882323-c038-4dc4-bd33-b0f1039c5428	holdout	50.00	50	2026-09-10 22:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 21:00:02.931869+00	\N	f
-734c2dc0-2723-4d0a-9f4d-3798a4fb25b6	reaction_tap	50.00	50	2026-09-10 22:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-ef8e2023-7643-43af-a113-9daa8731cabf	holdout	50.00	50	2026-09-10 22:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-0fedc123-6943-4270-95b1-597b1afa1eb7	reaction_tap	50.00	50	2026-09-10 22:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-2c6ffc2e-ff5e-4439-bf6f-5860fb7d87ba	holdout	50.00	50	2026-09-10 22:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-8d2008a3-c7d8-4aa0-82b0-024325a3ebb4	reaction_tap	50.00	50	2026-09-10 22:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-0afda74c-71e6-41da-ba67-6f7e5183ff3d	holdout	50.00	50	2026-09-10 22:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-2fea996d-5f9f-4f98-8ead-ba41d1890dc0	reaction_tap	50.00	50	2026-09-10 22:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-4ac5610c-1ee2-411f-a76c-f2e0f82c3d21	holdout	50.00	50	2026-09-10 22:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-1913446f-1830-475d-9d53-10eec1ac77cf	reaction_tap	50.00	50	2026-09-10 22:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-50b66450-6e40-42d9-8839-1b8cfd9982b0	holdout	50.00	50	2026-09-10 22:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-fa946aec-aadb-405d-a27c-7aef08ba68cd	reaction_tap	50.00	50	2026-09-10 22:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-c5df6aaa-b76e-48dd-944d-680ef2c14226	holdout	50.00	50	2026-09-10 22:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-10987032-8025-40b5-a93d-32b479ea9471	reaction_tap	50.00	50	2026-09-10 22:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-c8ffa58e-4129-42d1-a16e-d1e065ddc428	holdout	50.00	50	2026-09-10 22:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-2633b049-e734-4e15-b10a-76573603ba7b	reaction_tap	50.00	50	2026-09-10 22:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-1d490556-4746-470d-a66b-51974b11018e	holdout	50.00	50	2026-09-10 22:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-9ad21a54-9b9a-435d-907a-bcea23b5daeb	reaction_tap	50.00	50	2026-09-10 22:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-f7679519-164d-4219-a1f2-c0d043e528aa	holdout	50.00	50	2026-09-10 22:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-da58d8a0-dc79-44e7-9f4e-3647032ad003	reaction_tap	50.00	50	2026-09-10 22:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-53ae299b-deaf-4e28-a2c5-4671c676929d	holdout	50.00	50	2026-09-10 22:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-7f615c93-7fd4-43a1-825a-ac082d5e98f4	reaction_tap	50.00	50	2026-09-10 22:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-8563f2b0-499a-47ad-9f41-8a92cc7f3c98	holdout	50.00	50	2026-09-10 22:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-30e9c876-a697-4013-8fb8-54b0d97bc889	reaction_tap	50.00	50	2026-09-10 23:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-c4f3249e-762c-4385-870e-72acb49f2b31	holdout	50.00	50	2026-09-10 23:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 22:00:01.731994+00	\N	f
-4c8c783f-ba3c-4f32-80af-f6607b6afe64	reaction_tap	50.00	50	2026-09-10 23:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-52be8094-1396-47d5-95d1-f711e6fb2e86	holdout	50.00	50	2026-09-10 23:05:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-0d5d43f5-9ec3-4146-8bd2-95aad98c4034	reaction_tap	50.00	50	2026-09-10 23:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-067761f0-b5a5-40da-9ccd-98a0d521dbee	holdout	50.00	50	2026-09-10 23:10:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-e0629e9e-42a0-494d-acfb-554a89841eb7	holdout	50.00	50	2026-09-10 23:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-5010cb71-06f8-4759-a3e9-b49f248c9b70	reaction_tap	50.00	50	2026-09-10 23:15:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-2d41b438-39a5-4316-b6d6-2cf7545e03d2	reaction_tap	50.00	50	2026-09-10 23:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-d5e08612-7a33-4b6d-af36-54f0565751e5	holdout	50.00	50	2026-09-10 23:20:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-4fd0a7de-8edd-483e-8ac3-f4bd1cad5934	reaction_tap	50.00	50	2026-09-10 23:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-7da7b67f-4511-48a9-9cd3-569328aa5907	holdout	50.00	50	2026-09-10 23:25:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-e3f55f6e-3cd4-4d56-beb5-370f1cac4c0e	reaction_tap	50.00	50	2026-09-10 23:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-826a4cb8-abff-4fde-9763-5f2b14df28e4	holdout	50.00	50	2026-09-10 23:30:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-d5663049-1122-4873-813b-ee8b0609d27a	reaction_tap	50.00	50	2026-09-10 23:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-2725f572-9739-4286-9f58-512511e5a855	holdout	50.00	50	2026-09-10 23:35:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-0cc79784-6fae-4a36-a053-1e912d1fb637	reaction_tap	50.00	50	2026-09-10 23:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-8ad06054-024d-4b5a-9713-226ff19a3e79	holdout	50.00	50	2026-09-10 23:40:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-2b36dfda-daca-4899-a267-a912b37807f6	holdout	50.00	50	2026-09-10 23:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-0a5bffdb-3fb2-44eb-864e-cbc52bfa71bf	reaction_tap	50.00	50	2026-09-10 23:45:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-d370e7d4-e7dd-4d7a-bf2e-b59542a491a4	reaction_tap	50.00	50	2026-09-10 23:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-452b9f5b-4f3f-4286-9ab6-485a1b5b8a29	holdout	50.00	50	2026-09-10 23:50:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-9826b3b9-e6fb-40bf-a9f9-26de9bf3bc84	reaction_tap	50.00	50	2026-09-10 23:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-547267c2-e6cb-4e5e-b582-f83921fd9158	holdout	50.00	50	2026-09-10 23:55:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-14163ac8-4d18-4bf7-b521-690fdf387cf8	reaction_tap	50.00	50	2026-09-11 00:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-488b0b17-506e-4073-9202-c5da413a0db6	holdout	50.00	50	2026-09-11 00:00:00+00	cancelled	2	\N	\N	\N	2026-09-10 23:00:00.410436+00	\N	f
-3ac4cfb5-f232-4462-b3c7-71890b50158b	reaction_tap	50.00	50	2026-09-11 00:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-7143c207-f0d4-41bb-b4b6-be0d29e10d55	reaction_tap	50.00	50	2026-09-11 00:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-90d1a3ac-bb6a-402a-9ca4-701ec7abe47b	holdout	50.00	50	2026-09-11 00:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-9eb52107-6056-4128-8bf8-48f6256c1f74	reaction_tap	50.00	50	2026-09-11 00:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-2c79693b-87fe-4c9a-8955-4f3c7fc83018	holdout	50.00	50	2026-09-11 00:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-a2ca3a77-2eb2-4a59-9ac2-bbb6eada24f5	reaction_tap	50.00	50	2026-09-11 00:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-6ab0fbb0-ad38-496d-a59d-2f9ee0a40a14	holdout	50.00	50	2026-09-11 00:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-24461adc-4bba-4587-b0ce-d4c6c6eb3084	reaction_tap	50.00	50	2026-09-11 00:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-e5f46eda-85ff-438d-aba5-e6a32acc946e	holdout	50.00	50	2026-09-11 00:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-3201aa4f-ac44-4597-b35f-1b9cace11b53	holdout	50.00	50	2026-09-11 00:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-2243813b-a666-4cc2-9456-f32f81e49418	reaction_tap	50.00	50	2026-09-11 00:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-c2846a90-0ea4-4a3d-a8f4-9be658432e45	holdout	50.00	50	2026-09-11 00:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-9666a15c-e107-460e-b1fc-1c70a2da7900	reaction_tap	50.00	50	2026-09-11 00:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-b02fd5ad-a376-453d-882b-01c54d5f6e31	holdout	50.00	50	2026-09-11 00:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-947aa0e2-f22c-4403-a62f-a0ae7c580e68	reaction_tap	50.00	50	2026-09-11 00:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-9f555304-e46a-4b85-885c-35b954673ae6	holdout	50.00	50	2026-09-11 00:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-4834dd3e-0f3e-49ec-ab27-bbf1808eff29	reaction_tap	50.00	50	2026-09-11 00:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-71bd79f5-b9db-4bc1-b5f0-04a1c76e43f7	holdout	50.00	50	2026-09-11 00:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-8d8cb253-d860-46eb-a609-249efb36fff0	reaction_tap	50.00	50	2026-09-11 00:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-1e0dcc94-44c2-4a0a-ab55-9e9880db423a	holdout	50.00	50	2026-09-11 00:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-8f7608f2-e089-42ed-9d54-5ac65ad0f867	reaction_tap	50.00	50	2026-09-11 00:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-0f29a5e0-f94a-41a9-8db0-85287ea64dbe	holdout	50.00	50	2026-09-11 00:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-8360d4f0-99b7-4432-bc68-6ef6842cc03a	reaction_tap	50.00	50	2026-09-11 01:55:00+00	waiting	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-2c5f17e7-eebb-4f62-8569-281847bb91f2	holdout	50.00	50	2026-09-11 01:55:00+00	waiting	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-f122e5e5-550d-4507-819f-a56a7907e890	reaction_tap	50.00	50	2026-09-11 02:00:00+00	waiting	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-23a4d922-1446-4723-98b3-7d501b4100bf	holdout	50.00	50	2026-09-11 02:00:00+00	waiting	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-55525653-5a71-4994-9f07-f3a94654df8b	reaction_tap	50.00	50	2026-09-11 01:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-d62ecd70-79ee-460a-8ad4-45ba17836d08	holdout	50.00	50	2026-09-11 01:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 00:00:08.599212+00	\N	f
-81263759-8ce8-48a6-8a3c-f769673ac159	reaction_tap	50.00	50	2026-09-11 01:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-2d434d32-006d-40d8-a12f-e8c731a5269d	holdout	50.00	50	2026-09-11 01:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-d3c9b601-cc53-4d41-885a-311ebc065235	reaction_tap	50.00	50	2026-09-11 01:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-7b4fb737-e95c-4612-9a6c-02669f69a7dc	holdout	50.00	50	2026-09-11 01:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-4900caa9-b66c-4ee8-abf9-121a04a338a9	reaction_tap	50.00	50	2026-09-11 01:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-846738af-3530-4706-9ac3-5fe24a483ee7	holdout	50.00	50	2026-09-11 01:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-22ef451c-dc30-4d1b-971a-a86a9040b444	reaction_tap	50.00	50	2026-09-11 01:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-21b6238c-12ff-4673-9fb2-de0fb64ade76	holdout	50.00	50	2026-09-11 01:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-506447b2-7b43-4250-ab5e-1d78d81aaee5	reaction_tap	50.00	50	2026-09-11 01:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-1d751b28-fc16-440a-ab29-658c0c64b91c	holdout	50.00	50	2026-09-11 01:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-4350a1d7-b81b-4acb-8248-c6b4b5ad4b0e	reaction_tap	50.00	50	2026-09-11 01:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-92ebd2bb-a898-4a4d-8a85-6a597f071c21	holdout	50.00	50	2026-09-11 01:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-1877df64-8a17-404d-92d0-1ce9f1ef82c1	reaction_tap	50.00	50	2026-09-11 01:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-89ae2ab8-0be0-4fff-9090-6ea956c60392	holdout	50.00	50	2026-09-11 01:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-d0c6c27a-73bd-4767-b245-55bfee7a6470	reaction_tap	50.00	50	2026-09-11 01:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-6e5362f2-042c-4050-ba45-cdb1edbcaa5a	holdout	50.00	50	2026-09-11 01:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-f1e40827-fdc3-4060-90f5-c27080c8084c	reaction_tap	50.00	50	2026-09-11 01:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-5a6a2bde-3126-4775-b3f4-34b8e85b32a0	holdout	50.00	50	2026-09-11 01:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-fb4ed680-92fd-49bc-87a7-09c5cf5c913a	reaction_tap	50.00	50	2026-09-11 01:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
-98056782-9713-43f4-a58b-928771408907	holdout	50.00	50	2026-09-11 01:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 01:00:03.969693+00	\N	f
+34cbd223-cbba-46d3-ba34-778ca5e9ecb1	holdout	50.00	50	2026-09-11 15:05:00+00	cancelled	2	d78dfd4aff2919a1408ff7eb3cb3b64f	407e33797086f42ae96306b825c2b35b7d360463aa30aeea5a038f1fe79f44ff	2026-09-11 15:06:06.501+00	2026-09-11 15:00:00.669933+00	2755	t
+274d720e-f9b8-4f1c-b0c7-9a69ac8be3ab	reaction_tap	50.00	50	2026-09-11 14:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	holdout	50.00	50	2026-09-11 14:05:00+00	cancelled	2	59498ac2b7cd172ea347f3b596da603b	fcdb5d3b3bde1e0f767496b8c332cae42ca75373417b58a7510bb8678d0b4370	2026-09-11 14:05:25.566+00	2026-09-11 14:00:00.835569+00	4963	t
+a55f370a-8eb3-4240-90ff-d45c248cb213	reaction_tap	50.00	50	2026-09-11 14:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+7b97d6a2-9f3a-4a0b-9e67-353ac23a9e08	holdout	50.00	50	2026-09-11 14:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+e4e0aacd-e5ff-4ec2-aa8a-1f642bcd5839	reaction_tap	50.00	50	2026-09-11 14:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+7572f079-c6e5-419e-ad15-1bbd0e73eefc	holdout	50.00	50	2026-09-11 14:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+cb243732-4fed-4acc-92b8-ae6c152408eb	reaction_tap	50.00	50	2026-09-11 14:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+1bee1168-b3ad-4d71-aca7-9a6ae0eef753	holdout	50.00	50	2026-09-11 14:20:00+00	cancelled	2	ae604bd80705136b6ff722f1043d887d	e5adf148561c4b0c93102be4a8d236f645707673ba9e9048995293f007a1c720	2026-09-11 14:20:09.639+00	2026-09-11 14:00:00.835569+00	4691	t
+53f59b76-c822-4cec-8857-c4a5aa0d0f26	reaction_tap	50.00	50	2026-09-11 14:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	t
+39ca87c9-54f4-44a6-a79c-2333e9f78970	holdout	50.00	50	2026-09-11 14:25:00+00	live	2	cbeb8f51a8cd2bab4fa7fca193d4ffd8	14573d095fdf387f37c1c86d7fc3009a4acef0b18f56d5becb58d73ea9a6e347	\N	2026-09-11 14:00:00.835569+00	2238	t
+1e981134-ce80-4a88-9c81-e98d375c3427	holdout	50.00	50	2026-09-11 14:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+1e7139e1-cbca-4335-880d-e6ace6e15b0f	reaction_tap	50.00	50	2026-09-11 14:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	t
+1970ab55-67dd-474f-b8a1-e08e7db40621	reaction_tap	50.00	50	2026-09-11 14:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+7b445b49-5b68-4816-8c88-6239b6163d36	holdout	50.00	50	2026-09-11 14:35:00+00	live	2	e50e302875eaf7c7c23362901121101a	32f9aeb7256434dd4a42a571275c616e01a53977fb5c61418c062bf7f9949499	\N	2026-09-11 14:00:00.835569+00	2597	t
+9879b91f-6a9c-4dfe-9999-6bd4b11d7f17	reaction_tap	50.00	50	2026-09-11 14:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+9d6f7059-c6b6-4218-add2-f821846d524d	holdout	50.00	50	2026-09-11 14:40:00+00	live	2	908b9f7afc42bb1614213b7665d34ca6	4e4f80d0ad240963bd099ffbb8cacf29e9875dc710e7b6f833b00efbda25790c	\N	2026-09-11 14:00:00.835569+00	2917	t
+f9fc6991-080d-427b-a998-e6478f0db2f6	reaction_tap	50.00	50	2026-09-11 14:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+6515ca6c-6a4d-46e7-9b91-83fcd90560cb	holdout	50.00	50	2026-09-11 14:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+995eb47e-c4c8-41bc-9909-8cbef4bbb33c	reaction_tap	50.00	50	2026-09-11 14:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+6950e9ff-4c13-4e14-9333-450e9bd9fdcb	holdout	50.00	50	2026-09-11 14:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+2e3b5ff4-2c40-49bc-95c7-f44f3f1827a3	reaction_tap	50.00	50	2026-09-11 14:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+986d615f-7ad1-4cc3-b592-589136837cdf	holdout	50.00	50	2026-09-11 14:55:00+00	cancelled	2	f4674c93b715e66614e204bf2268cf62	d2667198d5a1fc218c054b64be6705de8dd69745c0c8c35bf02b4006a8a435e5	2026-09-11 14:55:08.517+00	2026-09-11 14:00:00.835569+00	4465	t
+1873237d-2fdb-4462-9e30-f58c6b8a3641	reaction_tap	50.00	50	2026-09-11 15:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 14:00:00.835569+00	\N	f
+881d3797-71b2-409d-b774-c3db58e1c209	reaction_tap	50.00	50	2026-09-11 15:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+85775b80-1a18-4ac3-8ea4-fbacadeee10a	holdout	50.00	50	2026-09-11 15:00:00+00	cancelled	2	380ed54ab004a04e512284d4bb82e48f	c1afabc13dfbe71c7f396b75162fca50fd1761d92344f0cf284c49b67509a3d4	2026-09-11 15:00:08.776+00	2026-09-11 14:00:00.835569+00	4269	t
+a518ccca-e4e8-45e1-9634-340844b21e58	holdout	50.00	50	2026-09-11 15:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+5684686f-8f9f-4d48-8571-6c198f7c27a4	reaction_tap	50.00	50	2026-09-11 15:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+c75a93f6-4bc1-4cf1-b1af-d97f894251d7	reaction_tap	50.00	50	2026-09-11 15:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+64dec3d8-e300-4ea1-8b7f-6874a72896f8	reaction_tap	50.00	50	2026-09-11 15:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+43a4bafa-ae05-454c-8911-d427b1a7bba5	holdout	50.00	50	2026-09-11 15:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+43fe9909-deb7-460f-b172-0381306c7898	reaction_tap	50.00	50	2026-09-11 15:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+f6e5d26c-3f54-4c0b-92da-29f47d920170	holdout	50.00	50	2026-09-11 15:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+e64d106b-e05c-473e-aa24-99bcd2b5f5f8	holdout	50.00	50	2026-09-11 15:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+c7c27e7e-6981-4f28-a67b-1da4338cdaf5	reaction_tap	50.00	50	2026-09-11 15:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+bc88dd25-84ab-4024-b8cf-2d713a863d87	holdout	50.00	50	2026-09-11 15:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+5d1e6d24-4824-4955-bddc-a5dc273d3aef	reaction_tap	50.00	50	2026-09-11 15:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+dee4ccf3-66e7-4b77-a0ba-f83f51735fae	holdout	50.00	50	2026-09-11 15:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+b91f64e2-b79e-4390-92a1-33575cad5f4c	reaction_tap	50.00	50	2026-09-11 15:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+49e6d66e-0d26-4255-9c15-bb60b72b082d	holdout	50.00	50	2026-09-11 15:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+4acf4535-45bf-41fe-a9c6-7c7071631f8d	reaction_tap	50.00	50	2026-09-11 15:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+85823d3e-7124-4dcd-84ae-25d300055cc9	holdout	50.00	50	2026-09-11 15:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+76d04569-37ab-4e43-ac69-f992b6805075	reaction_tap	50.00	50	2026-09-11 15:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+82723b94-45d7-4fcb-906f-800d59d3db89	holdout	50.00	50	2026-09-11 15:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+f20717e0-b738-4839-b91c-1c4098781868	reaction_tap	50.00	50	2026-09-11 15:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+d03df26a-66f5-4acb-b80b-d9db861fbeaf	holdout	50.00	50	2026-09-11 15:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+da4af640-0d21-45f6-a10a-731a831a04ff	reaction_tap	50.00	50	2026-09-11 16:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+f6ab4444-e1a9-44fa-8db0-335476c27e37	holdout	50.00	50	2026-09-11 16:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 15:00:00.669933+00	\N	f
+e690b556-7f36-4f9d-8d5a-57d8ae490d64	reaction_tap	50.00	50	2026-09-11 16:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+03a45cee-cc88-480a-a389-2cd458abf860	holdout	50.00	50	2026-09-11 16:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+3b339e71-1791-4468-b353-cc5bf63e318a	holdout	50.00	50	2026-09-11 16:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+f240145b-6463-4776-95c7-cb29c799e6b9	reaction_tap	50.00	50	2026-09-11 16:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+9c75c705-9e8e-4ce1-b7a8-7c79c6bad83a	reaction_tap	50.00	50	2026-09-11 16:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+9e50dfe2-5c62-489e-b118-ebc773a5d450	holdout	50.00	50	2026-09-11 16:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+b9efecc3-97cf-4921-bca5-009237bf9a50	reaction_tap	50.00	50	2026-09-11 16:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+36fe34a5-a818-41c2-a5be-0915809e3bed	holdout	50.00	50	2026-09-11 16:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+49a39e52-274a-43ff-a5cb-d3a2863af99e	reaction_tap	50.00	50	2026-09-11 16:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+128f7960-c7e0-4e65-80d2-5c68701e1c60	holdout	50.00	50	2026-09-11 16:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+f0f0d2cc-1fbb-49a1-9e0d-b6eb593ed938	reaction_tap	50.00	50	2026-09-11 16:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+3dcf213d-871f-45fa-a927-e973f746797c	holdout	50.00	50	2026-09-11 16:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+f20d29fb-f06c-4255-b7a3-11dfb851c82d	reaction_tap	50.00	50	2026-09-11 16:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+96dc80ea-c4ca-4041-ac5f-850c62bae6c9	holdout	50.00	50	2026-09-11 16:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+d4623b5f-1fd9-41e8-ba48-88fc4ab165f5	reaction_tap	50.00	50	2026-09-11 16:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+50d30b60-aa62-4cd8-bc32-a8682c6cad7d	holdout	50.00	50	2026-09-11 16:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+31627dcf-85db-49e5-b3e6-a11c0486b74c	reaction_tap	50.00	50	2026-09-11 16:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+aae50020-d1b8-4b08-a89d-0dc426378bc9	holdout	50.00	50	2026-09-11 16:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+d9f7ba41-c663-43ff-a87c-47b655b40963	reaction_tap	50.00	50	2026-09-11 16:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+0dd91933-3440-4abb-99be-097494876575	holdout	50.00	50	2026-09-11 16:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+9555b838-22ab-4699-a4b8-8b3915c1975c	reaction_tap	50.00	50	2026-09-11 16:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+c40b5db9-703d-46dd-aa3c-e1f03b0712e5	holdout	50.00	50	2026-09-11 16:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+f50b28f8-2c33-4b70-b58a-55b47d5da57a	reaction_tap	50.00	50	2026-09-11 17:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+e8316d1e-1b24-4ac1-9a85-9642c4776f30	holdout	50.00	50	2026-09-11 17:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 16:00:01.209062+00	\N	f
+c24d5801-fc1e-4994-88a3-4fdbcd463f9d	reaction_tap	50.00	50	2026-09-11 17:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+bad2b608-fa0a-4da4-9cd9-c61a427fb878	holdout	50.00	50	2026-09-11 17:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+0d04d235-6e76-41c6-967c-8213a048d877	reaction_tap	50.00	50	2026-09-11 17:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+c6cea2fc-92d1-4de4-8ba2-f7c23942f4ae	holdout	50.00	50	2026-09-11 17:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+48e8ce38-57a5-4534-bb94-68cbee196578	reaction_tap	50.00	50	2026-09-11 17:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+2d770fa0-3b0a-4924-8abc-48b9c8a690b4	holdout	50.00	50	2026-09-11 17:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+fae3223b-18f7-4d2d-850c-a43560a243c3	reaction_tap	50.00	50	2026-09-11 17:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+12381a0e-c360-4968-97a6-b61ae5ab6ac3	holdout	50.00	50	2026-09-11 17:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+7d9ac367-b60e-4fe6-a094-7ac4fbb23419	holdout	50.00	50	2026-09-11 17:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+ecc943c1-9523-4b02-99d8-d89500a2af1d	reaction_tap	50.00	50	2026-09-11 17:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+1d6d44f7-f983-4b91-bdc0-6b191457986e	reaction_tap	50.00	50	2026-09-11 17:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+cef4ef77-4df7-450c-974e-f6b81d7d1d66	holdout	50.00	50	2026-09-11 17:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+81356e5a-142d-4835-8e4f-8c3056e402da	reaction_tap	50.00	50	2026-09-11 17:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+499dadfa-44b5-408a-b5b5-c335b21fe5c7	holdout	50.00	50	2026-09-11 17:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+c33ce41c-bc1e-4d6f-b07b-76f39d9a40c6	reaction_tap	50.00	50	2026-09-11 17:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+b98fdaa9-2329-417b-8176-ead332a887a3	holdout	50.00	50	2026-09-11 17:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+cec82622-514c-4d8e-b6b2-55ef28fd0d54	reaction_tap	50.00	50	2026-09-11 17:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+89ed9c29-6b2b-4427-b331-e3f88ee5bf0d	holdout	50.00	50	2026-09-11 17:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+d95b4486-ba3a-4800-8502-f1a60840b7ed	reaction_tap	50.00	50	2026-09-11 17:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+e7c74b44-b000-43ba-a81a-370918435667	holdout	50.00	50	2026-09-11 17:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+7885ac78-e0da-4cbb-973c-10e7d1c8bbe9	reaction_tap	50.00	50	2026-09-11 17:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+effa92bf-2107-457c-a397-b5d2d28a9144	holdout	50.00	50	2026-09-11 17:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+7f5dab8f-3719-4716-a1b6-23ad79ed1f77	reaction_tap	50.00	50	2026-09-11 18:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+2ac8ba8f-dee5-4b7e-936b-b0716563de0c	holdout	50.00	50	2026-09-11 18:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 17:00:05.449108+00	\N	f
+08d90048-efaa-4e74-a48c-1a040921d4e6	reaction_tap	50.00	50	2026-09-11 18:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+0c9ef26f-3cbd-40a9-b674-7f9cd27c4af3	holdout	50.00	50	2026-09-11 18:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+2964dbe4-00c1-483f-9e49-f62046a28db1	reaction_tap	50.00	50	2026-09-11 18:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+36cdd9c7-4828-420a-83ff-e2b86bb94f52	holdout	50.00	50	2026-09-11 18:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+119d3ede-87b4-439f-b06a-1c8d0ffe1d45	reaction_tap	50.00	50	2026-09-11 18:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+08fcd7c1-39bf-4dfe-9d1e-6aaf97823304	holdout	50.00	50	2026-09-11 18:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+3df4b776-d055-492c-a743-7ebea1353f63	reaction_tap	50.00	50	2026-09-11 18:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+22829e75-d5a0-45f0-9944-e4099fd6797d	holdout	50.00	50	2026-09-11 18:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+53bae852-c4ff-4b3e-aaf9-ff8733791989	reaction_tap	50.00	50	2026-09-11 18:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+8955e17d-8460-4d68-a3a0-488d3e1138e8	reaction_tap	50.00	50	2026-09-11 18:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+ad24d727-a08c-4644-a8c9-f7b46d41fbe7	holdout	50.00	50	2026-09-11 18:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	t
+d40acb00-f844-4b61-a301-371855e90b28	reaction_tap	50.00	50	2026-09-11 18:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+558bf8fa-5398-47ad-8f91-4f930060ea8a	holdout	50.00	50	2026-09-11 18:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+07195c4b-b42a-40bd-b403-066d28732416	holdout	50.00	50	2026-09-11 18:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+b8345266-20fd-47ae-9c19-93e3893f79a3	reaction_tap	50.00	50	2026-09-11 18:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+e8cda5e1-f8ae-4817-a117-c87553eb7e1f	holdout	50.00	50	2026-09-11 18:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+7653d374-f45a-4bb9-9bfa-debbed37162c	reaction_tap	50.00	50	2026-09-11 18:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+2e8cadc4-db91-4d5a-a34c-4f84bbee75e1	holdout	50.00	50	2026-09-11 18:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+8efaeda4-8abf-4b97-bd2a-d90505d80f9f	reaction_tap	50.00	50	2026-09-11 18:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+5339d6d5-28d5-473e-9c09-998da70a96c7	holdout	50.00	50	2026-09-11 18:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+327381d5-4fb0-4591-ae45-55456b978dd1	reaction_tap	50.00	50	2026-09-11 18:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+90eab8de-1918-4062-8cd1-6312b1c9dd28	holdout	50.00	50	2026-09-11 18:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+d343e319-9a4b-477c-afc2-42d1af66434f	reaction_tap	50.00	50	2026-09-11 19:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+3bbd281d-85b6-44c8-8fec-d2c1335ff827	holdout	50.00	50	2026-09-11 19:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 18:00:13.474307+00	\N	f
+a1e13a2f-b958-4d19-b26e-c1a523b58d8f	reaction_tap	50.00	50	2026-09-11 19:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+596541de-d7ef-44b8-8b42-0513922354c0	holdout	50.00	50	2026-09-11 19:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+b984bc5a-8245-4c41-b5dc-4c5be428eef4	reaction_tap	50.00	50	2026-09-11 19:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+f4e41ce5-983c-4c88-a77b-0109d21473a9	holdout	50.00	50	2026-09-11 19:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+5aaa07f5-9ea8-4b90-9a05-280338644864	reaction_tap	50.00	50	2026-09-11 19:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+e1a10a55-e659-498a-8cd8-cd154bcd85c7	holdout	50.00	50	2026-09-11 19:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+329500ca-c530-4140-84dd-6a47487794b5	reaction_tap	50.00	50	2026-09-11 19:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+0fb00e0c-93b1-4abc-b496-b24145b704dc	holdout	50.00	50	2026-09-11 19:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+623b1c34-5f63-4a6e-b0f1-2c9827eb955a	reaction_tap	50.00	50	2026-09-11 19:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+be683d7c-c6a3-4ad6-a485-f41de21bdb4c	holdout	50.00	50	2026-09-11 19:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+74aaa829-7bae-4101-bef0-fe011c860aa1	reaction_tap	50.00	50	2026-09-11 19:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+f1b18ddc-71e9-439d-850a-5efb684922d9	holdout	50.00	50	2026-09-11 19:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+6b67e8dc-5ec1-4953-8953-5b166053ea8d	reaction_tap	50.00	50	2026-09-11 19:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+69e0cc39-bbdb-4b3d-a35a-e376a148f1a1	holdout	50.00	50	2026-09-11 19:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+d4f28693-a8f3-4a10-90a8-2d6bf93ed056	reaction_tap	50.00	50	2026-09-11 19:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+0b3ed45d-fbeb-4cc6-88a2-b133bf013c5f	holdout	50.00	50	2026-09-11 19:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+2024a3f9-8b3a-4116-a286-4fd6056392a4	reaction_tap	50.00	50	2026-09-11 19:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+7489b3d4-b53e-4585-ba57-5024a07f74c9	holdout	50.00	50	2026-09-11 19:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+68b38ff6-af27-4be8-8254-38bb14fa96de	reaction_tap	50.00	50	2026-09-11 19:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+1ef14193-4f44-4d02-b403-96a11456c955	holdout	50.00	50	2026-09-11 19:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+94e53fa1-16e6-4efc-93ef-3199fec57963	reaction_tap	50.00	50	2026-09-11 19:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+300f092b-d3b9-4868-997f-76968beb0df8	holdout	50.00	50	2026-09-11 19:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+f4fd6b24-9f40-475f-8b92-4024acb3ac6c	reaction_tap	50.00	50	2026-09-11 20:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+ae947451-3b74-4846-8293-f3fe01c47ce1	holdout	50.00	50	2026-09-11 20:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 19:00:03.229047+00	\N	f
+436d32b9-aa58-423b-9a58-c761fefecc20	reaction_tap	50.00	50	2026-09-11 20:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+6d4f5034-1bdc-4c2c-9885-075cb4813856	holdout	50.00	50	2026-09-11 20:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+e9b01994-3917-4567-a0b2-41ebeb804c0d	reaction_tap	50.00	50	2026-09-11 20:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+b9e1f5dd-637d-4ad0-a9a8-e13cd06881a0	holdout	50.00	50	2026-09-11 20:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+5a304d95-c971-4819-a004-9aee5c7aa97e	reaction_tap	50.00	50	2026-09-11 20:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+cd8e9fac-1169-4cdd-a8bd-3c7fdf980c35	holdout	50.00	50	2026-09-11 20:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+0ffab1e3-c7d4-44a1-aebd-046a2a931b33	reaction_tap	50.00	50	2026-09-11 20:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+24aa7e5f-3858-46c1-84fb-e57d157c599f	holdout	50.00	50	2026-09-11 20:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+b86a8a81-eea6-4b65-be32-7d5a548e097b	reaction_tap	50.00	50	2026-09-11 20:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+e0403eb4-518f-4ee9-ba3e-8ce111732db0	holdout	50.00	50	2026-09-11 20:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+f30f554b-f1cd-4933-be4e-f07bc8e1a56d	reaction_tap	50.00	50	2026-09-11 20:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+89ec9bd9-15cb-46aa-add6-e8c727b7ff0f	holdout	50.00	50	2026-09-11 20:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+43ef6454-ff6f-4470-b82b-10cf1b486c73	reaction_tap	50.00	50	2026-09-11 20:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+dcf92b60-f6e7-4b2c-88ae-cb4ea41f0e8b	holdout	50.00	50	2026-09-11 20:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+37cddeb4-ae45-4fb7-a091-52471dffd8be	reaction_tap	50.00	50	2026-09-11 20:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+5701b06b-92c6-4cb3-9e00-00ac54ea7a18	holdout	50.00	50	2026-09-11 20:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+8f9b87e4-2a7b-4ff2-9294-6ca9aeb66199	reaction_tap	50.00	50	2026-09-11 20:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+cd0f6704-a81c-40f2-adad-8187c49132f2	holdout	50.00	50	2026-09-11 20:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+f8d35085-a898-4200-b50f-1ce605e36315	reaction_tap	50.00	50	2026-09-11 20:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+3d892889-8a4f-44cb-91a5-5a3d79c26fae	holdout	50.00	50	2026-09-11 20:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+2afbab4c-817e-4777-a8b0-936e98b4b4f7	holdout	50.00	50	2026-09-11 20:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+a518fd39-5c0c-44e5-ab20-e7294e69a414	reaction_tap	50.00	50	2026-09-11 20:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+ed2d1ffe-cbed-4503-9e96-47caf1ff08e9	reaction_tap	50.00	50	2026-09-11 21:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+f8063597-bafd-445c-a6f5-be6b108a1721	holdout	50.00	50	2026-09-11 21:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 20:00:07.689023+00	\N	f
+65134750-034f-45f7-8d5e-8f8e438a4aa9	reaction_tap	50.00	50	2026-09-11 21:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+fb4304e7-b7b4-40d7-b536-e0c8440b8b20	holdout	50.00	50	2026-09-11 21:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+8da13176-35c2-47b4-aaf9-da290dedc6fc	reaction_tap	50.00	50	2026-09-11 21:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+01b78a58-b8ad-48c7-b138-ece41041b830	holdout	50.00	50	2026-09-11 21:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+1844591a-3bbb-4f0d-82f5-6af5a1b4ac34	reaction_tap	50.00	50	2026-09-11 21:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+c8d53446-b732-4dd8-8518-40f18b55bcde	holdout	50.00	50	2026-09-11 21:20:00+00	cancelled	2	6fdc947ce97b4d95cdff1de7025d810d	9b9e99797b0b879aa14f13468983ec057c2e3c10b8f1fb23728a7e0886adf95b	2026-09-11 21:24:41.649+00	2026-09-11 21:00:02.514951+00	3823	t
+783aca8d-f009-4ae6-a539-1c7a1e841b1b	reaction_tap	50.00	50	2026-09-11 21:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+975fe52b-315b-4a89-8ddb-bfae58a32069	reaction_tap	50.00	50	2026-09-11 21:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+fb0646ed-6344-4e7c-b803-b2757657e879	holdout	50.00	50	2026-09-11 21:15:00+00	cancelled	2	5ae0c10c04151e477f6dca0f644c3dc6	6c6001392ce4311f0c9a5781848ff6c1707e8de75920e7bf8b0caf6acf0a9b94	2026-09-11 21:16:20.292+00	2026-09-11 21:00:02.514951+00	3270	t
+6a089fee-278c-438d-bada-66e0d8d5d8ed	holdout	50.00	50	2026-09-11 21:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+90d32e0e-afcb-41f1-98e5-a0751f6f94a2	reaction_tap	50.00	50	2026-09-11 21:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+a33cf7fb-56ce-452f-8125-fba55d92822a	holdout	50.00	50	2026-09-11 21:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+ccacd704-5d12-437b-97ae-a622c22847f3	reaction_tap	50.00	50	2026-09-11 21:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+d7a30a80-7f32-4610-95f7-7fe853f7db63	holdout	50.00	50	2026-09-11 22:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+939fb71a-befc-4fa8-b349-cb349d488dac	holdout	50.00	50	2026-09-11 21:35:00+00	cancelled	2	207c48ed36936d80e53352528def123e	91764922b6a87543b53fd08ff057470b6b47f9fdf77ff4efc3428903f8cc2e52	2026-09-11 21:35:12.667+00	2026-09-11 21:00:02.514951+00	3704	f
+fbe0fe73-6c38-4825-b2ec-608b05474395	holdout	50.00	50	2026-09-11 22:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+1f28b859-ea22-4e7f-89e9-31f29b3cceeb	reaction_tap	50.00	50	2026-09-11 21:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+f9f0a017-70ec-4ee7-8891-aebfa3e5645d	reaction_tap	50.00	50	2026-09-11 22:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	holdout	50.00	50	2026-09-11 21:40:00+00	cancelled	2	a91e2fdce4a15a791b98c432752f4f95	fc58a97a06a36fdefc04cfc23a2978de1dd641c56b71621dab4f21b7c52c386e	2026-09-11 21:40:19.887+00	2026-09-11 21:00:02.514951+00	4957	t
+aa242cd2-91e3-4fb7-be9b-4ef6fae2fd5a	reaction_tap	50.00	50	2026-09-11 22:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+84d70a5c-3abf-49c5-b775-e90ffce3f9b6	reaction_tap	50.00	50	2026-09-11 21:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+a9c2611a-16dd-4513-80f3-52dafe864829	holdout	50.00	50	2026-09-11 22:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+da113afe-8419-46d9-8ad1-19ab6095fb9b	holdout	50.00	50	2026-09-11 21:45:00+00	cancelled	2	727dbc322a2c77be7016790a43c0ecb7	11619b2dd633096fa0326e34b22e2beb9c0c692e069abf943661da65ba0c9c95	2026-09-11 21:46:23.457+00	2026-09-11 21:00:02.514951+00	2203	t
+51b76c3b-8799-4f9b-9489-d09c569bea57	reaction_tap	50.00	50	2026-09-11 21:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+33e98120-bbb4-4511-817d-891d4ce026b1	holdout	50.00	50	2026-09-11 21:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+c39f2e1a-e2ac-4040-9225-39b0e62c9fad	reaction_tap	50.00	50	2026-09-11 21:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+6bd051c8-00d9-4f16-96c7-b1d119a811f2	holdout	50.00	50	2026-09-11 21:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+6c0de7a8-3a37-449f-ab70-09c15dcb1425	reaction_tap	50.00	50	2026-09-11 22:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 21:00:02.514951+00	\N	f
+63d8ba83-95d6-4f41-b047-6eb24435a943	reaction_tap	50.00	50	2026-09-11 22:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+09c04a36-2ad7-469b-9012-ccd00980b2e7	holdout	50.00	50	2026-09-11 22:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+99ec49e7-7942-4e6a-bc31-78045cce98df	reaction_tap	50.00	50	2026-09-11 22:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+92fb80d3-9469-4d72-aac6-2cd186d414d3	holdout	50.00	50	2026-09-11 22:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+bb589831-b373-47b7-98cf-195fece0e317	reaction_tap	50.00	50	2026-09-11 22:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+9e44d1c6-86b6-4618-afd1-b579d56fee50	holdout	50.00	50	2026-09-11 22:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+aceb07da-d55b-4a0c-8727-ada25d7399cc	reaction_tap	50.00	50	2026-09-11 22:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+243b279b-7903-49da-a978-32d988676d9a	holdout	50.00	50	2026-09-11 22:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+e4cbc027-d588-427c-8e31-600d78bf399b	reaction_tap	50.00	50	2026-09-11 22:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+50677e5f-9638-43fe-afe2-bcf90409afa8	holdout	50.00	50	2026-09-11 22:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+3b9a899e-c4af-48fe-b509-95ae2f867aa0	reaction_tap	50.00	50	2026-09-11 22:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+2c51500e-1646-4b2c-8513-4bcf3d5441b7	holdout	50.00	50	2026-09-11 22:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+b9df3437-676c-49ac-b667-250f11402124	reaction_tap	50.00	50	2026-09-11 22:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+f7476ebe-d870-4730-892d-4fcb3233c62c	holdout	50.00	50	2026-09-11 22:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+5513087f-bdba-4c30-97ba-df2b8d34dc1d	reaction_tap	50.00	50	2026-09-11 22:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+78e325e5-203e-4027-bdcf-b2bc8205549c	holdout	50.00	50	2026-09-11 22:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+230d524c-bf3d-420c-836c-4f13168d854d	reaction_tap	50.00	50	2026-09-11 22:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+c6e95171-21e0-467a-82c2-c032bbdde75f	holdout	50.00	50	2026-09-11 22:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+aa7aed2c-a962-4003-b140-f9f05b7765c5	reaction_tap	50.00	50	2026-09-11 23:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+a569625e-581d-4bb4-a26d-30a30db88d69	holdout	50.00	50	2026-09-11 23:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 22:00:24.50945+00	\N	f
+c43bfbcd-73e7-445b-9671-420e27ff6f6c	reaction_tap	50.00	50	2026-09-11 23:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+6a59eafe-994e-47d9-863a-6cbef167e9d3	reaction_tap	50.00	50	2026-09-11 23:05:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+e3d8e80b-824f-450e-aa9a-95859f8361ba	holdout	50.00	50	2026-09-11 23:05:00+00	live	2	072ac034f456e849fa2ac2d16128599b	2b0bc78d0aca9cbe379c6b7612d77c66a99a73d6ac63e6ce6d2ac22ea0666108	\N	2026-09-11 23:00:19.112044+00	2504	t
+ad36ec49-fda8-4460-9f24-72f2734749f7	holdout	50.00	50	2026-09-11 23:10:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+866157ab-d357-4a0d-8474-1678351ec2df	reaction_tap	50.00	50	2026-09-11 23:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+04860115-bdfc-4b83-bff0-81faf5f75711	holdout	50.00	50	2026-09-11 23:15:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+0cd93057-f633-421b-bd99-e731767735ce	reaction_tap	50.00	50	2026-09-11 23:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+8363cdae-5f87-4033-9089-5bb079d6572d	holdout	50.00	50	2026-09-11 23:20:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+0628a412-c539-46ef-8832-2ed71b3f0904	reaction_tap	50.00	50	2026-09-11 23:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+8988cab5-c36b-48d9-a6a9-7d195097a8fe	holdout	50.00	50	2026-09-11 23:25:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+0a381d10-5b0f-4d76-804c-d91f2fdca343	reaction_tap	50.00	50	2026-09-11 23:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+cb1b62ed-32bc-4104-be33-1e2c3ca035fd	holdout	50.00	50	2026-09-11 23:30:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+c75a9333-4d0e-47b9-b05d-1da5eb0521a9	reaction_tap	50.00	50	2026-09-11 23:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+6b7425d7-d007-4e36-b475-487c4ddb0cd4	reaction_tap	50.00	50	2026-09-11 23:35:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+791bab07-4ea3-41fd-9b7e-dd80f6057c72	holdout	50.00	50	2026-09-11 23:40:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+37a67108-6b25-4363-8b1d-73726c6e2d87	reaction_tap	50.00	50	2026-09-11 23:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+99c0f599-6942-4385-9a3c-051930f7a01e	holdout	50.00	50	2026-09-11 23:45:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+2770bed5-b439-4c57-99d4-75ccddf5432b	reaction_tap	50.00	50	2026-09-11 23:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+6ebcf039-89bd-48dc-90bb-ec00eb7d1aee	holdout	50.00	50	2026-09-11 23:50:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+e91fcc40-0ea6-439d-b88b-d7a2078bc87f	reaction_tap	50.00	50	2026-09-11 23:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+0d309aa8-00fe-4ac3-a572-0a1ad64a45bc	holdout	50.00	50	2026-09-11 23:55:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+84fffab7-06d2-499e-a5bb-074149aaa421	holdout	50.00	50	2026-09-11 23:35:00+00	cancelled	2	d0949ff5ffc6738730453620b62e624e	5b0f4e4d75fb382a73a4580e93351c0cdfe994fa8f90d60fc1746105c7a39599	2026-09-11 23:36:34.489+00	2026-09-11 23:00:19.112044+00	3067	t
+905f7d78-5bdb-4976-b11f-1a76bd5de820	reaction_tap	50.00	50	2026-09-12 00:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+3d70dedf-babf-43fd-8123-ed98772a63f8	holdout	50.00	50	2026-09-12 00:00:00+00	cancelled	2	\N	\N	\N	2026-09-11 23:00:19.112044+00	\N	f
+3207d5e3-04d2-43fb-954d-e240d984c1be	reaction_tap	50.00	50	2026-09-12 00:05:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+a2b4d449-64da-49bd-9343-d898b60b1720	holdout	50.00	50	2026-09-12 00:05:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+0d56d8e2-151a-4fb3-9a72-fba7ad2ac90a	reaction_tap	50.00	50	2026-09-12 00:10:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+5994376b-4ebc-4027-8aa0-c0145d12fc9e	holdout	50.00	50	2026-09-12 00:10:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+4af22a84-1f3d-4172-ba3a-429ba0eb5388	reaction_tap	50.00	50	2026-09-12 00:15:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+4f6d7a4e-02ef-4032-84fe-26bbf9d0409c	holdout	50.00	50	2026-09-12 00:15:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+8f1f4bb8-54e8-4cd4-82b7-3b27f47ff834	reaction_tap	50.00	50	2026-09-12 00:20:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+c71dc0f7-d97c-4a58-a559-ddc38d762c69	holdout	50.00	50	2026-09-12 00:20:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+8ec004c0-93e1-415c-b42b-f2d131095978	reaction_tap	50.00	50	2026-09-12 00:25:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+ff960f1f-99d5-46cc-9829-9ce168d508d1	holdout	50.00	50	2026-09-12 00:25:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+b24d6e1c-81f7-4965-93e3-d177f6d6dc0f	reaction_tap	50.00	50	2026-09-12 00:30:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+1ff94763-4264-45c7-8bee-70b9eef4945a	holdout	50.00	50	2026-09-12 00:30:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+b9a6fe3a-8f90-470a-b7a0-93d97f4860f1	reaction_tap	50.00	50	2026-09-12 00:35:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+af23d333-9a2a-4693-b0fb-1874aea9392a	holdout	50.00	50	2026-09-12 00:35:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+07bd5a55-140e-493c-aba0-d55e8ace798a	reaction_tap	50.00	50	2026-09-12 00:40:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+ec2552b9-1cda-4fbf-86c2-1936e9b6a462	holdout	50.00	50	2026-09-12 00:40:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+d8b0978d-816f-4f85-ae04-f6b2e6338371	reaction_tap	50.00	50	2026-09-12 00:45:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+22e39d10-6d34-4ef6-841b-75f063255bbe	holdout	50.00	50	2026-09-12 00:45:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+6bb4b070-02cc-4ba0-a8cc-bd94364fb74b	reaction_tap	50.00	50	2026-09-12 00:50:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+64b88ee4-9e83-4078-a209-1a3ce1b0f1c9	holdout	50.00	50	2026-09-12 00:50:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+598ec104-d1a4-4f32-ab0f-7a1619413505	reaction_tap	50.00	50	2026-09-12 00:55:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+9cc2c520-c35c-4c8f-93b1-73cacc69fc1f	holdout	50.00	50	2026-09-12 00:55:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+3ccc0538-437d-47fe-bf17-75072ca3f2f6	reaction_tap	50.00	50	2026-09-12 01:00:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
+6b887236-8fb5-4115-8117-8c07f81005d6	holdout	50.00	50	2026-09-12 01:00:00+00	cancelled	2	\N	\N	\N	2026-09-12 00:00:07.852948+00	\N	f
 \.
 
 
@@ -1311,6 +1650,45 @@ fb4ed680-92fd-49bc-87a7-09c5cf5c913a	reaction_tap	50.00	50	2026-09-11 01:50:00+0
 --
 
 COPY "public"."match_players" ("id", "match_id", "user_id", "joined_at", "result", "reaction_time_ms", "disqualified_at", "disqualify_reason", "survived_ms", "flag_status", "flag_reason") FROM stdin;
+6daff37f-9850-41ee-aab9-9609b39db046	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:00:09.137365+00	\N	\N	\N	\N	0	none	\N
+8a47e2e0-827b-4731-a9a5-14d1e42484ba	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:00:10.875339+00	disqualified	\N	2026-09-11 14:05:23.217+00	You lifted your finger.	23151	none	\N
+4dff5127-8662-4b43-b86f-36ae408fabfb	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:15:05.056008+00	\N	\N	\N	\N	0	none	\N
+48abf45e-d198-43dc-a206-b8937d22b3f0	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:15:09.42453+00	disqualified	\N	2026-09-11 14:20:08.38+00	You lifted your finger.	8326	none	\N
+4fa149d8-d609-43a9-ba25-ee9dfe61a182	39ca87c9-54f4-44a6-a79c-2333e9f78970	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:21:07.922592+00	\N	\N	\N	\N	0	none	\N
+dabc8082-441c-4aa5-a6d5-78dfa01bfe82	53f59b76-c822-4cec-8857-c4a5aa0d0f26	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:22:05.463649+00	\N	\N	\N	\N	0	none	\N
+11b095f0-2df6-413a-b423-24f3a1b58afd	1e7139e1-cbca-4335-880d-e6ace6e15b0f	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:28:22.814021+00	\N	\N	\N	\N	0	none	\N
+c273f2de-0374-43e4-b037-8ce8c3d12ead	39ca87c9-54f4-44a6-a79c-2333e9f78970	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:21:10.161834+00	disqualified	\N	2026-09-11 14:31:58.263+00	You didn't hold the screen in time.	418119	none	\N
+9ef722a7-b4be-4749-99e9-f104f4ab46e4	7b445b49-5b68-4816-8c88-6239b6163d36	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:32:06.097611+00	disqualified	\N	2026-09-11 14:37:07.775+00	You lifted your finger.	127717	none	\N
+2de5f194-4069-4e8f-843a-781448e22700	7b445b49-5b68-4816-8c88-6239b6163d36	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:31:39.710826+00	disqualified	\N	2026-09-11 14:37:08.052+00	You lifted your finger.	127992	none	\N
+212c7594-af33-4b9b-9035-1ee0e7642522	9d6f7059-c6b6-4218-add2-f821846d524d	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:37:27.764855+00	disqualified	\N	2026-09-11 14:40:05.342+00	You moved out of bounds.	5279	none	\N
+a80fefa6-34a1-46b5-86b4-b32515f9444f	9d6f7059-c6b6-4218-add2-f821846d524d	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:37:28.686455+00	disqualified	\N	2026-09-11 14:40:06.621+00	You lifted your finger.	6555	none	\N
+a6fd0650-f77e-4ad5-84a3-f5fdf84e0cb6	986d615f-7ad1-4cc3-b592-589136837cdf	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:51:05.69399+00	\N	\N	\N	\N	0	none	\N
+5e24736c-913b-4596-81cf-5ffad4c8250b	986d615f-7ad1-4cc3-b592-589136837cdf	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:51:23.762568+00	disqualified	\N	2026-09-11 14:55:08.16+00	You lifted your finger.	8160	none	\N
+44367286-1b0d-4ac1-ae62-8f57cfcdc68d	85775b80-1a18-4ac3-8ea4-fbacadeee10a	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 14:55:46.306377+00	\N	\N	\N	\N	0	none	\N
+21b8344f-ee60-415b-accb-532cf235774f	85775b80-1a18-4ac3-8ea4-fbacadeee10a	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 14:55:41.2494+00	disqualified	\N	2026-09-11 15:00:08.511+00	You lifted your finger.	8511	none	\N
+f4b169dc-e336-44bc-b63a-5c56fcc5d814	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 15:00:22.050852+00	\N	\N	\N	\N	0	none	\N
+c24ac0a9-3ed9-4fa4-a5c4-8bb7378d2ba8	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 15:00:21.743769+00	disqualified	\N	2026-09-11 15:06:06.292+00	You lifted your finger.	66291	none	\N
+cc085a50-ef1d-412b-a198-6a5f8a57ce45	22829e75-d5a0-45f0-9944-e4099fd6797d	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 18:19:50.350764+00	\N	\N	\N	\N	0	none	\N
+0c79d7ab-325a-4c04-a7ce-482079e8c33d	ad24d727-a08c-4644-a8c9-f7b46d41fbe7	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 18:23:03.275088+00	\N	\N	\N	\N	0	none	\N
+e00acc41-05c8-4030-9038-d89d0759bb2b	fb0646ed-6344-4e7c-b803-b2757657e879	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 21:11:18.405441+00	\N	\N	\N	\N	0	none	\N
+af7f4854-bd0e-439f-907a-29f0fff4a2ba	fb0646ed-6344-4e7c-b803-b2757657e879	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 21:11:19.799781+00	\N	\N	\N	\N	0	none	\N
+175c1e4b-34fb-4c75-a0e2-892209af0f91	fb0646ed-6344-4e7c-b803-b2757657e879	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:11:44.269888+00	\N	\N	\N	\N	0	none	\N
+367c91d1-9f34-4cb3-acbf-6e11554009b6	fb0646ed-6344-4e7c-b803-b2757657e879	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 21:10:59.628371+00	disqualified	\N	2026-09-11 21:16:20.072+00	You didn't hold the screen in time.	80072	none	\N
+706e5d5d-2d41-4c88-8cd4-56acebf0e24b	c8d53446-b732-4dd8-8518-40f18b55bcde	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:18:35.587604+00	\N	\N	\N	\N	0	none	\N
+b566644b-dac7-4bd4-8ce3-f0d557090781	c8d53446-b732-4dd8-8518-40f18b55bcde	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 21:18:41.833953+00	disqualified	\N	2026-09-11 21:24:41.435+00	You lifted your finger.	281435	none	\N
+5efd4b64-c238-41ce-a102-29bc36504dab	939fb71a-befc-4fa8-b349-cb349d488dac	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:30:53.891012+00	\N	\N	\N	\N	0	none	\N
+b7468eb3-2b33-46d4-920c-611a17348b65	939fb71a-befc-4fa8-b349-cb349d488dac	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 21:31:23.115835+00	disqualified	\N	2026-09-11 21:35:10.69+00	You lifted your finger.	10615	none	\N
+49796332-2ac5-4ee9-820d-a21ac025cf2e	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 21:38:54.254527+00	\N	\N	\N	\N	0	none	\N
+28d3bc24-6979-4d6f-bff5-427040018f53	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:38:15.506217+00	disqualified	\N	2026-09-11 21:40:17.831+00	You lifted your finger.	17770	none	\N
+7f826534-c028-482c-87b2-bfefcc5edb01	da113afe-8419-46d9-8ad1-19ab6095fb9b	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 21:44:20.704454+00	\N	\N	\N	\N	0	none	\N
+fcdbf7cd-806e-42d6-bd9c-812d49fe9d98	da113afe-8419-46d9-8ad1-19ab6095fb9b	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 21:42:36.610592+00	disqualified	\N	2026-09-11 21:46:13.971+00	You lifted your finger.	73924	none	\N
+3218c806-a7ef-4e31-9690-9d236abb0361	da113afe-8419-46d9-8ad1-19ab6095fb9b	51a9566d-d142-4f07-b339-89f012525bef	2026-09-11 21:42:39.007591+00	disqualified	\N	2026-09-11 21:46:22.035+00	You lifted your finger.	81974	none	\N
+a59b9f80-122a-4c8b-8699-d411161716cc	e3d8e80b-824f-450e-aa9a-95859f8361ba	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 23:01:12.584275+00	\N	\N	\N	\N	0	none	\N
+0c5a7966-e71c-4607-9fa6-a0bb8855fdd0	e3d8e80b-824f-450e-aa9a-95859f8361ba	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 23:01:50.007571+00	disqualified	\N	2026-09-11 23:05:19.707+00	You didn't hold the screen in time.	19646	none	\N
+2824b806-7390-49cb-8382-d7dcaa1e623e	e3d8e80b-824f-450e-aa9a-95859f8361ba	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 23:01:14.734581+00	disqualified	\N	2026-09-11 23:05:19.708+00	You didn't hold the screen in time.	19658	none	\N
+15d6ff66-952e-4a78-90d5-b8e78886723c	84fffab7-06d2-499e-a5bb-074149aaa421	cc322760-a401-4e42-be48-54fa2d80ce27	2026-09-11 23:31:36.942208+00	\N	\N	\N	\N	0	none	\N
+3dbce022-9b3b-4928-a247-0922739c6c27	84fffab7-06d2-499e-a5bb-074149aaa421	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	2026-09-11 23:31:22.021703+00	disqualified	\N	2026-09-11 23:36:17.606+00	You didn't hold the screen in time.	77557	none	\N
+e722ae8a-3d0e-4148-9b7b-d4915f65f42c	84fffab7-06d2-499e-a5bb-074149aaa421	903d0e9f-6138-477c-9402-31e0ea7a6251	2026-09-11 23:34:42.099283+00	disqualified	\N	2026-09-11 23:36:32.839+00	You lifted your finger.	92781	none	\N
 \.
 
 
@@ -1327,23 +1705,29 @@ COPY "public"."notification_queue" ("id", "chat_id", "message", "parse_mode", "p
 --
 
 COPY "public"."reconciliation_logs" ("id", "status", "discrepancy_details", "created_at") FROM stdin;
-2607cc67-baf7-4948-a727-0d83275ad59c	pass	\N	2026-09-10 17:00:00.715443+00
-230932a3-1376-46e8-a82f-d7b6cb6befd6	pass	\N	2026-09-10 17:30:09.203288+00
-57c5fd3f-7aa9-4f3e-8e4c-ace3845b8013	pass	\N	2026-09-10 18:00:04.722658+00
-05b7e75d-13ea-43ce-9622-abaf95e9c570	pass	\N	2026-09-10 18:30:00.600271+00
-7442fa60-1571-4346-a60e-aa23a4652a1b	pass	\N	2026-09-10 19:00:01.388926+00
-95d164ce-7efa-46a1-b910-7c66fc9e96ad	pass	\N	2026-09-10 19:30:06.626981+00
-3223d58f-897f-4c3e-bda0-ca23e390c850	pass	\N	2026-09-10 20:00:04.923187+00
-23d95c91-3bc3-4fe8-9f0f-7d5595fccb4d	pass	\N	2026-09-10 20:30:00.88052+00
-c2a6cef1-1646-43d3-8cc9-cd24ae7349d1	pass	\N	2026-09-10 21:00:01.253549+00
-a490c4c4-abde-43e4-8c33-a3d9ebbafd60	pass	\N	2026-09-10 21:30:06.240551+00
-f70f8857-e196-4177-ba27-be2300f85e4b	pass	\N	2026-09-10 22:00:13.773425+00
-45e76efe-ceb1-4487-979d-c033fbca7622	pass	\N	2026-09-10 22:30:02.025432+00
-9aa7240c-5806-4da9-9fdd-f6ff97cc208b	pass	\N	2026-09-10 23:00:00.71575+00
-81ce004b-3616-40ff-950e-0b1231cb4dd8	pass	\N	2026-09-10 23:30:01.731865+00
-3e495f9a-e02e-4e4d-9ad1-c330cd1a2c73	pass	\N	2026-09-11 00:00:07.624301+00
-5ab4f39e-7b3b-4e21-996e-6acca3a87912	pass	\N	2026-09-11 00:30:07.564762+00
-2a9a7c6a-1700-4cef-a572-e4e686fe0b7d	pass	\N	2026-09-11 01:30:03.170521+00
+5da0745f-cc8c-4aa2-b16c-f5f41ecae2e4	pass	\N	2026-09-11 14:00:03.178761+00
+8d6da8b6-74f1-4f23-805f-07f113720f97	pass	\N	2026-09-11 14:30:00.914546+00
+ffaf5d9f-9670-4e42-bf48-1fa212233362	pass	\N	2026-09-11 15:00:01.190756+00
+4c075786-983b-41fe-b9ae-f5fc33de76b3	pass	\N	2026-09-11 15:30:02.564024+00
+3391ba61-7fe2-4bc9-b5ff-5f24fa89fdc6	pass	\N	2026-09-11 16:30:07.62014+00
+a97c7ee5-a548-4f99-9e68-f5a3e78dc042	pass	\N	2026-09-11 17:00:03.11347+00
+c858f53a-1915-4b96-bdbf-b64f1101d7f9	pass	\N	2026-09-11 17:30:14.581128+00
+f8917489-2282-46c2-915e-df6a9768aeed	pass	\N	2026-09-11 18:00:28.109375+00
+209f8515-c904-4fc6-929c-646d26f07e7c	pass	\N	2026-09-11 18:30:28.028987+00
+b53d6954-b828-4527-88d5-0454c5596604	pass	\N	2026-09-11 19:00:29.379098+00
+badd4271-f5f2-43fa-b740-f2f4f794c836	pass	\N	2026-09-11 19:30:24.572559+00
+859f57d2-f398-4ef7-b8b5-81f19d87b21b	pass	\N	2026-09-11 20:00:31.769422+00
+e8a97d36-d84b-40f9-a818-ee8994685a88	pass	\N	2026-09-11 20:30:18.92263+00
+f17b8762-c3a1-4a56-a6be-81640a8eba22	pass	\N	2026-09-11 21:00:28.495954+00
+5cbd950f-3d64-48a5-b645-fa5bbff6c387	pass	\N	2026-09-11 21:30:21.862043+00
+582356d5-5206-478f-b1cc-5fab5f234b72	pass	\N	2026-09-11 22:00:25.371411+00
+68136770-1444-4085-84e1-0ff35237b151	pass	\N	2026-09-11 22:30:18.915567+00
+23c64fc1-d87c-4420-9ef9-5bfdd728aea7	pass	\N	2026-09-11 23:00:27.019549+00
+7120c5f7-ff29-477c-a2b9-64aff880e0a8	pass	\N	2026-09-11 23:30:21.525486+00
+1a1d618c-5b13-4457-9079-965b5fa70cab	pass	\N	2026-09-12 00:00:16.799764+00
+160df59a-4291-4f0e-a0db-44a5770e1e52	pass	\N	2026-09-12 00:30:18.040451+00
+83a6ee2b-c6c3-432c-8038-b40907cb9a5d	pass	\N	2026-09-12 01:00:17.589614+00
+367bb0bb-5b4e-4ca1-bfd6-c18e5865664b	pass	\N	2026-09-12 01:30:22.898614+00
 \.
 
 
@@ -1352,6 +1736,83 @@ f70f8857-e196-4177-ba27-be2300f85e4b	pass	\N	2026-09-10 22:00:13.773425+00
 --
 
 COPY "public"."transactions" ("id", "user_id", "type", "amount", "match_id", "status", "reference_code", "raw_sms", "created_at", "details", "approved_by_1", "approved_by_2", "risk_flags") FROM stdin;
+4deeada9-be81-4af8-b8f8-e678da8d8d7e	cc322760-a401-4e42-be48-54fa2d80ce27	deposit	1000.00	\N	completed	TEST111A	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****1888) on 11/08/2026 13:14:46. Your transaction number is TEST111A. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 13:50:31.684716+00	\N	\N	\N	\N
+a5dc2b09-1c82-4191-a7e7-d5da22a40f46	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	deposit	1000.00	\N	completed	TEST111C	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****1888) on 11/08/2026 13:14:46. Your transaction number is TEST111c. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 13:53:06.049718+00	\N	\N	\N	\N
+f493c67f-ff5d-4b8e-9141-2be2cab4c8b6	29152f5a-bf99-4801-a283-8fe34ffb8174	deposit	1000.00	\N	pending	111B	\N	2026-09-11 13:54:06.463854+00	\N	\N	\N	\N
+618cad5b-5783-40e2-a60b-352c44b57fa8	29152f5a-bf99-4801-a283-8fe34ffb8174	deposit	1000.00	\N	completed	TEST111B	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****1888) on 11/08/2026 13:14:46. Your transaction number is TEST111B. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 13:57:17.508057+00	\N	\N	\N	\N
+2c92c26e-0338-4ad1-869e-9995a563b18c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	completed	\N	\N	2026-09-11 14:00:09.137365+00	\N	\N	\N	\N
+204611f8-0d0c-46d9-8434-8ad80fc64e97	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	completed	\N	\N	2026-09-11 14:00:10.875339+00	\N	\N	\N	\N
+bc45203a-2ccd-4cb0-9f83-51f59da9361c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	completed	\N	\N	2026-09-11 14:05:25.492725+00	\N	\N	\N	\N
+97724929-87f0-40c8-8733-9ec9f214cd7c	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	c52b8bb2-6edb-4ec8-83fe-61b9d2615f54	completed	\N	\N	2026-09-11 14:05:25.492725+00	\N	\N	\N	\N
+325291e2-c369-4dbe-b5b3-5ab9896b4abb	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	completed	\N	\N	2026-09-11 14:15:05.056008+00	\N	\N	\N	\N
+abe71042-6fe0-49d7-9fb6-698cb6d15d3d	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	completed	\N	\N	2026-09-11 14:15:09.42453+00	\N	\N	\N	\N
+d5132230-9c3f-4146-9b74-d1cd5c9e76da	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	completed	\N	\N	2026-09-11 14:20:09.610745+00	\N	\N	\N	\N
+4073cd91-e3ff-49e5-8d8a-e083200f5239	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	1bee1168-b3ad-4d71-aca7-9a6ae0eef753	completed	\N	\N	2026-09-11 14:20:09.610745+00	\N	\N	\N	\N
+7f3e5ca0-962a-4124-a02f-2fc43e7499c9	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	39ca87c9-54f4-44a6-a79c-2333e9f78970	completed	\N	\N	2026-09-11 14:21:07.922592+00	\N	\N	\N	\N
+1cd585a6-b1c0-443d-bb20-feb0ae75ced8	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	39ca87c9-54f4-44a6-a79c-2333e9f78970	completed	\N	\N	2026-09-11 14:21:10.161834+00	\N	\N	\N	\N
+0bef63b0-4e85-42db-aaa3-4d9dca8ef095	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	53f59b76-c822-4cec-8857-c4a5aa0d0f26	completed	\N	\N	2026-09-11 14:22:05.463649+00	\N	\N	\N	\N
+e4072e98-78fa-4d27-8d21-8a5648357e53	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	53f59b76-c822-4cec-8857-c4a5aa0d0f26	completed	\N	\N	2026-09-11 14:25:01.520364+00	\N	\N	\N	\N
+20d282ce-e7bb-408c-ac88-5a582e8b3355	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	1e7139e1-cbca-4335-880d-e6ace6e15b0f	completed	\N	\N	2026-09-11 14:28:22.814021+00	\N	\N	\N	\N
+af9e35fa-1e7a-48a0-a86f-e9c8db59b445	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	1e7139e1-cbca-4335-880d-e6ace6e15b0f	completed	\N	\N	2026-09-11 14:30:01.272853+00	\N	\N	\N	\N
+130a8560-c2de-434f-863b-7213668e5ac4	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	7b445b49-5b68-4816-8c88-6239b6163d36	completed	\N	\N	2026-09-11 14:31:39.710826+00	\N	\N	\N	\N
+2fb5aafa-19bd-4948-9356-dcd344667df3	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	7b445b49-5b68-4816-8c88-6239b6163d36	completed	\N	\N	2026-09-11 14:32:06.097611+00	\N	\N	\N	\N
+23e7a52b-7663-4bbe-b2e4-355946cfe531	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	9d6f7059-c6b6-4218-add2-f821846d524d	completed	\N	\N	2026-09-11 14:37:27.764855+00	\N	\N	\N	\N
+ef07fd88-87b8-4b92-84da-384ab9f1fb72	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	9d6f7059-c6b6-4218-add2-f821846d524d	completed	\N	\N	2026-09-11 14:37:28.686455+00	\N	\N	\N	\N
+9f149a26-ee26-41da-85ad-bed519aad733	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	986d615f-7ad1-4cc3-b592-589136837cdf	completed	\N	\N	2026-09-11 14:51:05.69399+00	\N	\N	\N	\N
+d4b5cca1-eb21-4085-bb33-be87c9e45681	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	986d615f-7ad1-4cc3-b592-589136837cdf	completed	\N	\N	2026-09-11 14:51:23.762568+00	\N	\N	\N	\N
+308e493d-a4db-46f8-8022-5ff5ef007462	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	986d615f-7ad1-4cc3-b592-589136837cdf	completed	\N	\N	2026-09-11 14:55:08.445927+00	\N	\N	\N	\N
+bf66c2f0-63f4-4586-9bc8-ce2d60a768f7	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	986d615f-7ad1-4cc3-b592-589136837cdf	completed	\N	\N	2026-09-11 14:55:08.445927+00	\N	\N	\N	\N
+73ab9239-b8f7-4aab-902e-e00e2f99a083	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	85775b80-1a18-4ac3-8ea4-fbacadeee10a	completed	\N	\N	2026-09-11 14:55:41.2494+00	\N	\N	\N	\N
+7c5af12a-6d1f-459c-be1e-22513f935afb	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	85775b80-1a18-4ac3-8ea4-fbacadeee10a	completed	\N	\N	2026-09-11 14:55:46.306377+00	\N	\N	\N	\N
+2ab18b46-36ab-4a45-98d0-b5849013e14a	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	85775b80-1a18-4ac3-8ea4-fbacadeee10a	completed	\N	\N	2026-09-11 15:00:08.747317+00	\N	\N	\N	\N
+ef23ace2-db4a-482b-8b76-e91924ed593c	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	85775b80-1a18-4ac3-8ea4-fbacadeee10a	completed	\N	\N	2026-09-11 15:00:08.747317+00	\N	\N	\N	\N
+42d54b29-e7fb-4273-9c64-9e0b34d73536	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	completed	\N	\N	2026-09-11 15:00:21.743769+00	\N	\N	\N	\N
+64018cd1-c396-4b71-8546-f40f3f6cae29	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	completed	\N	\N	2026-09-11 15:00:22.050852+00	\N	\N	\N	\N
+6820df73-f069-415c-8ec2-98dcb04f77c1	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	completed	\N	\N	2026-09-11 15:06:06.473149+00	\N	\N	\N	\N
+0f12247c-d5a5-4235-8892-7f633c9e8f15	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	34cbd223-cbba-46d3-ba34-778ca5e9ecb1	completed	\N	\N	2026-09-11 15:06:06.473149+00	\N	\N	\N	\N
+b7d23e86-51e8-4fef-b4f9-e521a08c3213	903d0e9f-6138-477c-9402-31e0ea7a6251	deposit	1000.00	\N	pending	TEST111D	\N	2026-09-11 15:06:46.297302+00	\N	\N	\N	\N
+fbb9a0ad-b7ab-4761-8eed-464df7d065ea	cf7fb5c0-b0ce-4ddb-b48d-16ec7fdcab72	deposit	1000.00	\N	pending	TEST111E	\N	2026-09-11 18:19:48.723863+00	\N	\N	\N	\N
+e1e1ed2a-8f08-4c95-a961-f7c6b8e6b5e4	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	22829e75-d5a0-45f0-9944-e4099fd6797d	completed	\N	\N	2026-09-11 18:19:50.350764+00	\N	\N	\N	\N
+c0268a49-4217-4e56-9190-210ecaa35977	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	22829e75-d5a0-45f0-9944-e4099fd6797d	completed	\N	\N	2026-09-11 18:20:08.077029+00	\N	\N	\N	\N
+6456911a-56c9-4d4e-8fb5-dd388658d09a	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	ad24d727-a08c-4644-a8c9-f7b46d41fbe7	completed	\N	\N	2026-09-11 18:23:03.275088+00	\N	\N	\N	\N
+ac964a8d-3bee-4a05-b019-35460c1076b2	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	ad24d727-a08c-4644-a8c9-f7b46d41fbe7	completed	\N	\N	2026-09-11 18:25:10.016857+00	\N	\N	\N	\N
+75d83e0f-7dc5-48ff-9b29-c98a99633b20	51a9566d-d142-4f07-b339-89f012525bef	deposit	1000.00	\N	completed	TEST111F	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****8888) on 11/08/2026 13:14:46. Your transaction number is TEST111F. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 18:48:00.945312+00	\N	\N	\N	\N
+a1ba1ec9-4aba-4b17-901e-19475bc8a98f	903d0e9f-6138-477c-9402-31e0ea7a6251	deposit	1000.00	\N	completed	TEST111H	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****8888) on 11/08/2026 13:14:46. Your transaction number is TEST111h. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom\n	2026-09-11 21:07:07.344853+00	\N	\N	\N	\N
+1a159ddb-62e3-4e2c-964b-010a7b71674e	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:10:59.628371+00	\N	\N	\N	\N
+9d0ace19-9931-42b3-bbca-51b306913c46	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:11:18.405441+00	\N	\N	\N	\N
+39547a97-cb54-45ba-bc2e-d1fa939daeec	903d0e9f-6138-477c-9402-31e0ea7a6251	entry_fee	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:11:19.799781+00	\N	\N	\N	\N
+2c1a9ebf-cdc4-4c78-b93e-2716bb1de56f	51a9566d-d142-4f07-b339-89f012525bef	entry_fee	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:11:44.269888+00	\N	\N	\N	\N
+3298a7e1-da99-41a9-8499-42f5f4421d58	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:16:20.234734+00	\N	\N	\N	\N
+16d9642a-9b4a-4f2c-8250-9153614a8938	903d0e9f-6138-477c-9402-31e0ea7a6251	refund	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:16:20.234734+00	\N	\N	\N	\N
+40b1611f-e79e-41ca-a37b-246f1efae5a4	51a9566d-d142-4f07-b339-89f012525bef	refund	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:16:20.234734+00	\N	\N	\N	\N
+78e9d771-e295-4c33-acd1-a84c6260d9c2	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	fb0646ed-6344-4e7c-b803-b2757657e879	completed	\N	\N	2026-09-11 21:16:20.234734+00	\N	\N	\N	\N
+d1037f27-aa0c-4f93-8112-fe76c53ceb7d	51a9566d-d142-4f07-b339-89f012525bef	entry_fee	50.00	c8d53446-b732-4dd8-8518-40f18b55bcde	completed	\N	\N	2026-09-11 21:18:35.587604+00	\N	\N	\N	\N
+c1cc1235-9d38-461e-9701-21ad260bf402	903d0e9f-6138-477c-9402-31e0ea7a6251	entry_fee	50.00	c8d53446-b732-4dd8-8518-40f18b55bcde	completed	\N	\N	2026-09-11 21:18:41.833953+00	\N	\N	\N	\N
+3953d05d-d6dd-4bdb-b445-be8721c6cdf5	51a9566d-d142-4f07-b339-89f012525bef	refund	50.00	c8d53446-b732-4dd8-8518-40f18b55bcde	completed	\N	\N	2026-09-11 21:24:41.598376+00	\N	\N	\N	\N
+0d7da54c-cd3a-4bf5-bee3-fb2dfd3c4068	903d0e9f-6138-477c-9402-31e0ea7a6251	refund	50.00	c8d53446-b732-4dd8-8518-40f18b55bcde	completed	\N	\N	2026-09-11 21:24:41.598376+00	\N	\N	\N	\N
+69ef6c24-b032-42c7-8917-c038bbe72566	51a9566d-d142-4f07-b339-89f012525bef	entry_fee	50.00	939fb71a-befc-4fa8-b349-cb349d488dac	completed	\N	\N	2026-09-11 21:30:53.891012+00	\N	\N	\N	\N
+89656e94-c685-477f-aa91-2f55d636cc88	903d0e9f-6138-477c-9402-31e0ea7a6251	entry_fee	50.00	939fb71a-befc-4fa8-b349-cb349d488dac	completed	\N	\N	2026-09-11 21:31:23.115835+00	\N	\N	\N	\N
+25fe2ffb-3c35-4c28-a32d-f262c5dc8b7b	51a9566d-d142-4f07-b339-89f012525bef	refund	50.00	939fb71a-befc-4fa8-b349-cb349d488dac	completed	\N	\N	2026-09-11 21:35:12.497394+00	\N	\N	\N	\N
+ee192c51-952f-4087-9006-0c256feb8f85	903d0e9f-6138-477c-9402-31e0ea7a6251	refund	50.00	939fb71a-befc-4fa8-b349-cb349d488dac	completed	\N	\N	2026-09-11 21:35:12.497394+00	\N	\N	\N	\N
+5fc4b83c-d940-4e1c-a5ce-9a7b5339ce87	51a9566d-d142-4f07-b339-89f012525bef	entry_fee	50.00	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	completed	\N	\N	2026-09-11 21:38:15.506217+00	\N	\N	\N	\N
+b8a30199-c5b2-4bc1-bbeb-7f7a3b205fe1	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	completed	\N	\N	2026-09-11 21:38:54.254527+00	\N	\N	\N	\N
+56b7fa50-5175-40da-aa6d-d9d9d36fd17d	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	completed	\N	\N	2026-09-11 21:40:19.854555+00	\N	\N	\N	\N
+4b43969c-7787-433a-82df-ace1648ecfc2	51a9566d-d142-4f07-b339-89f012525bef	refund	50.00	4e8f439a-45ac-4a3a-ba61-2b01cc5093e4	completed	\N	\N	2026-09-11 21:40:19.854555+00	\N	\N	\N	\N
+71c7d0c0-064d-4c60-87f4-fe630a9ff536	51a9566d-d142-4f07-b339-89f012525bef	entry_fee	50.00	da113afe-8419-46d9-8ad1-19ab6095fb9b	completed	\N	\N	2026-09-11 21:42:39.007591+00	\N	\N	\N	\N
+41b80cc7-87ab-4330-907e-db2d1c6dc993	903d0e9f-6138-477c-9402-31e0ea7a6251	entry_fee	50.00	da113afe-8419-46d9-8ad1-19ab6095fb9b	completed	\N	\N	2026-09-11 21:44:20.704454+00	\N	\N	\N	\N
+fc22e746-9b02-4f7d-a898-bd1999e4d53c	903d0e9f-6138-477c-9402-31e0ea7a6251	refund	50.00	da113afe-8419-46d9-8ad1-19ab6095fb9b	completed	\N	\N	2026-09-11 21:46:23.415412+00	\N	\N	\N	\N
+ace2b55b-2ff3-4a5e-8d7d-cba19fa7d09d	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	da113afe-8419-46d9-8ad1-19ab6095fb9b	completed	\N	\N	2026-09-11 21:46:23.415412+00	\N	\N	\N	\N
+712dc1be-914b-4697-b43b-739699cfe337	51a9566d-d142-4f07-b339-89f012525bef	refund	50.00	da113afe-8419-46d9-8ad1-19ab6095fb9b	completed	\N	\N	2026-09-11 21:46:23.415412+00	\N	\N	\N	\N
+ee75e3c1-dc43-4beb-a443-786924239925	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	da113afe-8419-46d9-8ad1-19ab6095fb9b	completed	\N	\N	2026-09-11 21:42:36.610592+00	\N	\N	\N	\N
+91a03b49-fe14-4955-bdec-8c70dfc54097	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	e3d8e80b-824f-450e-aa9a-95859f8361ba	completed	\N	\N	2026-09-11 23:01:12.584275+00	\N	\N	\N	\N
+62fdf9e5-2304-4457-8f01-aec0da1399a2	903d0e9f-6138-477c-9402-31e0ea7a6251	entry_fee	50.00	e3d8e80b-824f-450e-aa9a-95859f8361ba	completed	\N	\N	2026-09-11 23:01:14.734581+00	\N	\N	\N	\N
+854d2d91-35f2-47c5-a245-1094f302a4be	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	e3d8e80b-824f-450e-aa9a-95859f8361ba	completed	\N	\N	2026-09-11 23:01:50.007571+00	\N	\N	\N	\N
+36c0a9a9-9d3d-4a78-a3e9-90f4d0b34de3	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	entry_fee	50.00	84fffab7-06d2-499e-a5bb-074149aaa421	completed	\N	\N	2026-09-11 23:31:22.021703+00	\N	\N	\N	\N
+efd0454c-c271-4a36-9cdd-49a03e33cec0	cc322760-a401-4e42-be48-54fa2d80ce27	entry_fee	50.00	84fffab7-06d2-499e-a5bb-074149aaa421	completed	\N	\N	2026-09-11 23:31:36.942208+00	\N	\N	\N	\N
+b305afe1-efb1-4c02-b58b-cc14ebe9aea1	903d0e9f-6138-477c-9402-31e0ea7a6251	entry_fee	50.00	84fffab7-06d2-499e-a5bb-074149aaa421	completed	\N	\N	2026-09-11 23:34:42.099283+00	\N	\N	\N	\N
+3b925a6c-00b9-46c0-b9c2-5776cdf9933a	cc322760-a401-4e42-be48-54fa2d80ce27	refund	50.00	84fffab7-06d2-499e-a5bb-074149aaa421	completed	\N	\N	2026-09-11 23:36:34.437663+00	\N	\N	\N	\N
+3f4fb8ce-30bf-4434-b09b-3220984f148e	35669b50-bf3b-4459-a1d1-5d6af9f9d7da	refund	50.00	84fffab7-06d2-499e-a5bb-074149aaa421	completed	\N	\N	2026-09-11 23:36:34.437663+00	\N	\N	\N	\N
+596a487b-545b-4fec-b12d-e53730febe31	903d0e9f-6138-477c-9402-31e0ea7a6251	refund	50.00	84fffab7-06d2-499e-a5bb-074149aaa421	completed	\N	\N	2026-09-11 23:36:34.437663+00	\N	\N	\N	\N
 \.
 
 
@@ -1360,7 +1821,11 @@ COPY "public"."transactions" ("id", "user_id", "type", "amount", "match_id", "st
 --
 
 COPY "public"."sms_queue" ("id", "raw_sms", "received_at", "parsed_amount", "parsed_reference", "matched_transaction_id", "status", "admin_note", "parsed_phone") FROM stdin;
-75173f78-ab12-4e02-ad84-593fa0503858	Hi	2026-09-10 20:01:37.152791+00	\N	\N	\N	unmatched	\N	\N
+54bc4fd5-b167-47f0-81a6-212296b026dc	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****1888) on 11/08/2026 13:14:46. Your transaction number is TEST111A. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 13:49:24.876619+00	1000.00	TEST111A	4deeada9-be81-4af8-b8f8-e678da8d8d7e	matched	\N	2519****1888
+315a90d2-91a0-4d74-b74e-5ce086a696c9	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****1888) on 11/08/2026 13:14:46. Your transaction number is TEST111c. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 13:52:35.942617+00	1000.00	TEST111C	a5dc2b09-1c82-4191-a7e7-d5da22a40f46	matched	\N	2519****1888
+c70dbeac-b50a-4a91-b8a2-b2d0cfb8c56e	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****1888) on 11/08/2026 13:14:46. Your transaction number is TEST111B. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 13:51:32.150524+00	1000.00	TEST111B	618cad5b-5783-40e2-a60b-352c44b57fa8	matched	\N	2519****1888
+96743788-b6ba-4ab9-a2b3-ada3af4b4493	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****8888) on 11/08/2026 13:14:46. Your transaction number is TEST111F. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom	2026-09-11 18:46:49.157355+00	1000.00	TEST111F	75d83e0f-7dc5-48ff-9b29-c98a99633b20	matched	\N	2519****8888
+72fd68a6-3203-4fce-869b-4b1afd0c7d65	Dear Amanuel You have received ETB 1000.00 from Amanuel Gashaw(2519****8888) on 11/08/2026 13:14:46. Your transaction number is TEST111h. Your current E-Money Account balance is ETB 116.69. Thank you for using telebirr Ethio telecom\n	2026-09-11 21:05:16.690141+00	1000.00	TEST111H	a1ba1ec9-4aba-4b17-901e-19475bc8a98f	matched	Reference not found	2519****8888
 \.
 
 
@@ -1369,7 +1834,7 @@ COPY "public"."sms_queue" ("id", "raw_sms", "received_at", "parsed_amount", "par
 --
 
 COPY "public"."system_settings" ("id", "status", "lockdown_reason", "updated_at", "activated_by", "activated_at") FROM stdin;
-1	operational	\N	2026-09-10 16:59:11.405611+00	\N	\N
+1	operational	\N	2026-09-11 13:49:05.725969+00	\N	\N
 \.
 
 
@@ -1434,13 +1899,13 @@ COPY "storage"."vector_indexes" ("id", "name", "bucket_id", "data_type", "dimens
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 464, true);
+SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 546, true);
 
 
 --
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict 49jInBzkiqeHiFSpLwBz2lTMnuEKSbLdVgSHy6Ps2ZMmAxdks9LEvTL6HSCuAIl
+-- \unrestrict EphMW5tjzshQyJm6XUAVvn9Bjuec6JZr9Ifkn8sHzuG9Pdn0j4InoHs6FD8Avss
 
 RESET ALL;
