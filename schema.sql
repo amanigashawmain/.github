@@ -256,6 +256,60 @@ END;
 ALTER FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") RETURNS json
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+    v_remaining INT;
+    v_total INT;
+    v_winner_id UUID;
+BEGIN
+    -- 0. Lock the match row so concurrent DQ calls for this match_id are
+    --    serialized. This is the critical fix for the race condition:
+    --    the second concurrent call now blocks here until the first call's
+    --    transaction commits, guaranteeing it sees an up-to-date count.
+    PERFORM id FROM matches WHERE id = p_match_id FOR UPDATE;
+
+    -- 1. Atomically DQ the player (only if they aren't already DQ'd)
+    UPDATE match_players
+    SET result = 'disqualified', disqualified_at = now(), disqualify_reason = p_reason
+    WHERE match_id = p_match_id AND user_id = p_user_id AND result IS NULL;
+
+    -- 2. Total players ever in this match (NOT filtered by result), needed
+    --    for correct payout math.
+    SELECT count(*) INTO v_total
+    FROM match_players
+    WHERE match_id = p_match_id;
+
+    -- 3. Remaining (still-alive) players, now safe to read since we hold
+    --    the match lock and any concurrent DQ has either committed or is
+    --    blocked behind us.
+    SELECT count(*), max(user_id)
+    INTO v_remaining, v_winner_id
+    FROM match_players
+    WHERE match_id = p_match_id AND result IS NULL;
+
+    IF v_remaining = 0 THEN
+        -- Everyone is DQ'd. Refund.
+        PERFORM refund_match(p_match_id);
+        UPDATE matches SET status = 'cancelled' WHERE id = p_match_id;
+        RETURN json_build_object('status', 'cancelled');
+    ELSIF v_remaining = 1 THEN
+        -- We have a winner!
+        UPDATE match_players SET result = 'win' WHERE match_id = p_match_id AND user_id = v_winner_id;
+        UPDATE matches SET status = 'completed' WHERE id = p_match_id;
+        RETURN json_build_object('status', 'completed', 'winner_id', v_winner_id, 'player_count', v_total);
+    ELSE
+        -- Match continues
+        RETURN json_build_object('status', 'live');
+    END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_admin_dashboard_stats"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -2046,6 +2100,12 @@ GRANT ALL ON FUNCTION "public"."deduct_balance"("p_amount" numeric) TO "service_
 GRANT ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) TO "anon";
 GRANT ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") TO "service_role";
 
 
 
