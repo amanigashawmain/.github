@@ -181,15 +181,29 @@ ALTER FUNCTION "public"."check_balance_nonnegative"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ BEGIN
-  UPDATE users
-  SET real_balance = real_balance + p_amount
-  WHERE id = p_user_id;
+    AS $$ DECLARE
+  v_balance BIGINT;
+  v_exists BOOLEAN;
+BEGIN
+  -- 1. Idempotency Check: If we already credited this deposit, do nothing
+  SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = 'deposit_' || p_transaction_id) INTO v_exists;
+  IF v_exists THEN RETURN; END IF;
 
+  -- 2. Lock the user's ledger rows
+  PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
+
+  -- 3. Compute current balance
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance
+  FROM ledger_entries WHERE user_id = p_user_id;
+
+  -- 4. Insert ledger entry (positive amount)
+  INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+  VALUES (p_user_id, p_amount, 'deposit', p_transaction_id, 'deposit_' || p_transaction_id, v_balance + p_amount);
+
+  -- 5. Update transaction status to completed
   UPDATE transactions
   SET status = 'completed', raw_sms = p_raw_sms
-  WHERE id = p_transaction_id
-  AND status = 'pending';
+  WHERE id = p_transaction_id AND status = 'pending';
 END;
  $$;
 
