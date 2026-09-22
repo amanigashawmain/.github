@@ -861,6 +861,97 @@ END;
 ALTER FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."leave_match_and_refund"("p_match_id" "uuid", "p_user_id" "uuid") RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_match_status TEXT;
+  v_scheduled_start TIMESTAMPTZ;
+  v_was_in_match BOOLEAN;
+  v_balance BIGINT;
+  v_idempotency_key TEXT;
+  v_entry_fee BIGINT;
+  v_should_refund BOOLEAN;
+BEGIN
+  -- 1. Lock the match row to serialize against scheduler / other leavers
+  SELECT status, scheduled_start
+    INTO v_match_status, v_scheduled_start
+  FROM matches
+  WHERE id = p_match_id
+  FOR UPDATE;
+
+  IF v_match_status IS NULL THEN
+    RETURN 'match_not_found';
+  END IF;
+
+  IF v_match_status != 'waiting' THEN
+    RETURN 'match_started';
+  END IF;
+
+  -- 2. Confirm the caller is actually a participant
+  SELECT EXISTS (
+    SELECT 1 FROM match_players
+    WHERE match_id = p_match_id AND user_id = p_user_id
+  ) INTO v_was_in_match;
+
+  IF NOT v_was_in_match THEN
+    RETURN 'not_in_match';
+  END IF;
+
+  -- 3. Refund policy: >120s to scheduled_start = refunded, otherwise forfeited
+  v_should_refund := (v_scheduled_start - now()) > interval '120 seconds';
+
+  -- 4. Remove the player from the match (safe: unique on match_id, user_id)
+  DELETE FROM match_players
+  WHERE match_id = p_match_id AND user_id = p_user_id;
+
+  -- 5. If refunding, credit back the original entry fee
+  IF v_should_refund THEN
+    -- Read the amount that was actually charged (do not hardcode 50)
+    SELECT ABS(amount)
+      INTO v_entry_fee
+    FROM ledger_entries
+    WHERE user_id = p_user_id
+      AND reference_id = p_match_id
+      AND type = 'entry_fee'
+    ORDER BY created_at DESC
+    LIMIT 1;
+
+    -- Defensive fallback if the entry fee row is somehow missing
+    v_entry_fee := COALESCE(v_entry_fee, 50);
+
+    v_idempotency_key := 'leave_refund_' || p_match_id || '_' || p_user_id;
+
+    -- Lock the ledger rows so concurrent credits/debits serialize
+    PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
+    SELECT COALESCE(SUM(amount), 0)
+      INTO v_balance
+    FROM ledger_entries
+    WHERE user_id = p_user_id;
+
+    INSERT INTO ledger_entries (
+      user_id, amount, type, reference_id, idempotency_key, balance_after
+    )
+    VALUES (
+      p_user_id, v_entry_fee, 'refund', p_match_id, v_idempotency_key,
+      v_balance + v_entry_fee
+    );
+
+    -- Mirror into transactions so the Wallet UI shows the refund
+    INSERT INTO transactions (user_id, match_id, type, amount, status)
+    VALUES (p_user_id, p_match_id, 'refund', v_entry_fee, 'completed');
+
+    RETURN 'refunded';
+  ELSE
+    RETURN 'forfeited';
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."leave_match_and_refund"("p_match_id" "uuid", "p_user_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."notify_new_pending_transaction"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -1060,35 +1151,42 @@ ALTER FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uui
 
 CREATE OR REPLACE FUNCTION "public"."refund_match"("p_match_id" "uuid") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_player RECORD;
   v_balance BIGINT;
   v_idempotency_key TEXT;
 BEGIN
-  -- Loop through all players who joined this match
   FOR v_player IN SELECT user_id FROM match_players WHERE match_id = p_match_id LOOP
-    -- Create a unique idempotency key for this refund
     v_idempotency_key := 'refund_' || p_match_id || '_' || v_player.user_id;
-    
-    -- Check if we already refunded this player for this match
-    IF NOT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = v_idempotency_key) THEN
-      -- Lock the user's ledger rows
-      PERFORM 1 FROM ledger_entries WHERE user_id = v_player.user_id FOR UPDATE;
-      
-      -- Compute current balance
-      SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_player.user_id;
-      
-      -- Insert refund ledger entry (positive 50Q)
-      INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
-      VALUES (v_player.user_id, 50, 'refund', p_match_id, v_idempotency_key, v_balance + 50);
-      
-      -- Insert into transactions table so Wallet UI shows it
-      INSERT INTO transactions (user_id, match_id, type, amount, status)
-      VALUES (v_player.user_id, p_match_id, 'refund', 50, 'completed');
+
+    -- Skip if already refunded
+    IF EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = v_idempotency_key) THEN
+      CONTINUE;
     END IF;
+
+    -- CRITICAL: Skip if this player already received a prize payout for this match
+    IF EXISTS (
+      SELECT 1 FROM ledger_entries
+      WHERE user_id = v_player.user_id
+        AND reference_id = p_match_id
+        AND type = 'prize_payout'
+    ) THEN
+      CONTINUE;
+    END IF;
+
+    PERFORM 1 FROM ledger_entries WHERE user_id = v_player.user_id FOR UPDATE;
+    SELECT COALESCE(SUM(amount), 0) INTO v_balance
+      FROM ledger_entries WHERE user_id = v_player.user_id;
+
+    INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+    VALUES (v_player.user_id, 50, 'refund', p_match_id, v_idempotency_key, v_balance + 50);
+
+    INSERT INTO transactions (user_id, match_id, type, amount, status)
+    VALUES (v_player.user_id, p_match_id, 'refund', 50, 'completed');
   END LOOP;
 END;
- $$;
+$$;
 
 
 ALTER FUNCTION "public"."refund_match"("p_match_id" "uuid") OWNER TO "postgres";
@@ -1355,7 +1453,7 @@ CREATE TABLE IF NOT EXISTS "public"."ledger_entries" (
     "balance_after" bigint NOT NULL,
     "created_by" bigint,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'platform_fee'::"text", 'refund'::"text", 'admin_adjustment'::"text", 'opening_balance'::"text"])))
+    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'refund'::"text", 'platform_fee'::"text"])))
 );
 
 
@@ -1499,7 +1597,7 @@ CREATE TABLE IF NOT EXISTS "public"."transactions" (
     "approved_by_1" bigint,
     "approved_by_2" bigint,
     "risk_flags" "text",
-    CONSTRAINT "transactions_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'completed'::"text", 'failed'::"text", 'cancelled'::"text"]))),
+    CONSTRAINT "transactions_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'pending_approval_2'::"text", 'completed'::"text", 'rejected'::"text"]))),
     CONSTRAINT "transactions_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdraw'::"text", 'entry_fee'::"text", 'winnings'::"text", 'refund'::"text", 'platform_fee'::"text"])))
 );
 
@@ -2234,6 +2332,12 @@ GRANT ALL ON FUNCTION "public"."is_admin"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."leave_match_and_refund"("p_match_id" "uuid", "p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."leave_match_and_refund"("p_match_id" "uuid", "p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."leave_match_and_refund"("p_match_id" "uuid", "p_user_id" "uuid") TO "service_role";
 
 
 
