@@ -105,7 +105,8 @@ ALTER FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_
 
 CREATE OR REPLACE FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_deposits BIGINT;
   v_withdrawals BIGINT;
   v_entry_fees BIGINT;
@@ -113,14 +114,26 @@ CREATE OR REPLACE FUNCTION "public"."calculate_user_balance_breakdown"("p_user_i
   v_refunds BIGINT;
   v_calculated_balance BIGINT;
 BEGIN
-  SELECT COALESCE(SUM(amount), 0) INTO v_deposits FROM ledger_entries WHERE user_id = p_user_id AND type = 'deposit';
-  SELECT COALESCE(SUM(ABS(amount)), 0) INTO v_withdrawals FROM ledger_entries WHERE user_id = p_user_id AND type IN ('withdrawal_lock', 'withdrawal_complete');
-  SELECT COALESCE(SUM(ABS(amount)), 0) INTO v_entry_fees FROM ledger_entries WHERE user_id = p_user_id AND type = 'entry_fee';
-  SELECT COALESCE(SUM(amount), 0) INTO v_payouts FROM ledger_entries WHERE user_id = p_user_id AND type = 'prize_payout';
-  SELECT COALESCE(SUM(amount), 0) INTO v_refunds FROM ledger_entries WHERE user_id = p_user_id AND type = 'refund';
-  
+  SELECT COALESCE(SUM(amount), 0) INTO v_deposits
+  FROM ledger_entries WHERE user_id = p_user_id AND type = 'deposit';
+
+  -- Net withdrawals: lock (-) plus reject (+) = 0 if rejected, else the locked amount.
+  SELECT COALESCE(-1 * SUM(amount), 0) INTO v_withdrawals
+  FROM ledger_entries
+  WHERE user_id = p_user_id
+    AND type IN ('withdrawal_lock', 'withdrawal_complete', 'withdrawal_reject');
+
+  SELECT COALESCE(SUM(ABS(amount)), 0) INTO v_entry_fees
+  FROM ledger_entries WHERE user_id = p_user_id AND type = 'entry_fee';
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_payouts
+  FROM ledger_entries WHERE user_id = p_user_id AND type = 'prize_payout';
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_refunds
+  FROM ledger_entries WHERE user_id = p_user_id AND type = 'refund';
+
   v_calculated_balance := v_deposits - v_withdrawals - v_entry_fees + v_payouts + v_refunds;
-  
+
   RETURN json_build_object(
     'deposits', v_deposits,
     'withdrawals', v_withdrawals,
@@ -130,7 +143,7 @@ BEGIN
     'calculated_balance', v_calculated_balance
   );
 END;
- $$;
+$$;
 
 
 ALTER FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") OWNER TO "postgres";
@@ -324,6 +337,33 @@ $$;
 ALTER FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_id" "uuid") RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_status text;
+  v_exists boolean;
+BEGIN
+  SELECT status INTO v_status FROM matches WHERE id = p_match_id FOR UPDATE;
+  IF v_status IS NULL THEN RETURN 'match_not_found'; END IF;
+  IF v_status != 'waiting' THEN RETURN 'already_started'; END IF;
+
+  SELECT EXISTS (
+    SELECT 1 FROM match_players WHERE match_id = p_match_id AND user_id = p_user_id
+  ) INTO v_exists;
+  IF NOT v_exists THEN RETURN 'not_in_match'; END IF;
+
+  UPDATE match_players SET is_in_lobby = true
+  WHERE match_id = p_match_id AND user_id = p_user_id;
+
+  RETURN 'ok';
+END;
+$$;
+
+
+ALTER FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_admin_dashboard_stats"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -413,6 +453,35 @@ END;
 
 
 ALTER FUNCTION "public"."get_audit_logs"("p_limit" integer) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_latest_failed_reconciliation"() RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_details TEXT;
+  v_created_at TIMESTAMPTZ;
+BEGIN
+  SELECT discrepancy_details, created_at
+    INTO v_details, v_created_at
+  FROM reconciliation_logs
+  WHERE status = 'fail'
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  IF v_created_at IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  RETURN json_build_object(
+    'details', v_details,
+    'created_at', v_created_at
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_latest_failed_reconciliation"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_latest_reconciliation"() RETURNS json
@@ -768,6 +837,70 @@ END;
 ALTER FUNCTION "public"."get_user_profile"("p_identifier" "text") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_user_stats"() RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_user_id UUID;
+  v_matches INT;
+  v_wins INT;
+  v_credits_won BIGINT;
+  v_best_reaction INT;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RETURN json_build_object('matches', 0, 'wins', 0, 'credits_won', 0, 'best_reaction', 0);
+  END IF;
+
+  SELECT COUNT(*) INTO v_matches
+  FROM match_players
+  WHERE user_id = v_user_id AND result IS NOT NULL;
+
+  SELECT COUNT(*) INTO v_wins
+  FROM match_players
+  WHERE user_id = v_user_id AND result = 'win';
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_credits_won
+  FROM ledger_entries
+  WHERE user_id = v_user_id AND type = 'prize_payout';
+
+  SELECT MIN(reaction_time_ms) INTO v_best_reaction
+  FROM match_players
+  WHERE user_id = v_user_id
+    AND reaction_time_ms IS NOT NULL
+    AND result IS DISTINCT FROM 'disqualified';
+
+  RETURN json_build_object(
+    'matches', v_matches,
+    'wins', v_wins,
+    'credits_won', v_credits_won,
+    'best_reaction', COALESCE(v_best_reaction, 0)
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_user_stats"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer DEFAULT 10) RETURNS TABLE("user_id" "uuid", "balance" bigint)
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT le.user_id, SUM(le.amount)::bigint AS balance
+  FROM ledger_entries le
+  GROUP BY le.user_id
+  HAVING SUM(le.amount) < 0
+  ORDER BY SUM(le.amount) ASC
+  LIMIT p_limit;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."is_admin"() RETURNS boolean
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$ DECLARE
@@ -794,68 +927,55 @@ ALTER FUNCTION "public"."is_admin"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") RETURNS "text"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_balance BIGINT;
   v_exists BOOLEAN;
   v_match_status TEXT;
+  v_scheduled_start TIMESTAMPTZ;
   v_pool_size INT;
   v_current_players INT;
   v_already_in_match BOOLEAN;
 BEGIN
-  -- 1. Lock the match row & fetch details
-  SELECT status, pool_size INTO v_match_status, v_pool_size 
+  SELECT status, pool_size, scheduled_start
+    INTO v_match_status, v_pool_size, v_scheduled_start
   FROM matches WHERE id = p_match_id FOR UPDATE;
-  
+
   IF v_match_status IS NULL OR v_match_status != 'waiting' THEN
     RETURN 'match_closed';
   END IF;
 
-  -- 2. Idempotency Check (Same key used)
+  -- Reject late joins: within 10 seconds of scheduled_start
+  IF v_scheduled_start - now() < interval '10 seconds' THEN
+    RETURN 'match_closed';
+  END IF;
+
   SELECT EXISTS (SELECT 1 FROM ledger_entries WHERE idempotency_key = p_idempotency_key) INTO v_exists;
-  IF v_exists THEN
-    RETURN 'already_joined';
-  END IF;
+  IF v_exists THEN RETURN 'already_joined'; END IF;
 
-  -- 3. Check if user is already in this match
   SELECT EXISTS (SELECT 1 FROM match_players WHERE match_id = p_match_id AND user_id = p_user_id) INTO v_already_in_match;
-  IF v_already_in_match THEN
-    RETURN 'already_joined';
-  END IF;
+  IF v_already_in_match THEN RETURN 'already_joined'; END IF;
 
-  -- 4. CRITICAL FIX: Check if match is full
   SELECT COUNT(*) INTO v_current_players FROM match_players WHERE match_id = p_match_id;
-  IF v_current_players >= v_pool_size THEN
-    RETURN 'match_full';
-  END IF;
+  IF v_current_players >= v_pool_size THEN RETURN 'match_full'; END IF;
 
-  -- 5. Lock the user's ledger rows
   PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
+  SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = p_user_id;
 
-  -- 6. Compute current balance
-  SELECT COALESCE(SUM(amount), 0) INTO v_balance
-  FROM ledger_entries WHERE user_id = p_user_id;
+  IF v_balance < p_amount THEN RETURN 'insufficient_balance'; END IF;
 
-  -- 7. Validate sufficient funds
-  IF v_balance < p_amount THEN
-    RETURN 'insufficient_balance';
-  END IF;
-
-  -- 8. Deduct balance
   INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
   VALUES (p_user_id, -p_amount, 'entry_fee', p_match_id, p_idempotency_key, v_balance - p_amount);
 
-  -- 9. Insert into match_players
-  INSERT INTO match_players (match_id, user_id)
-  VALUES (p_match_id, p_user_id)
+  INSERT INTO match_players (match_id, user_id) VALUES (p_match_id, p_user_id)
   ON CONFLICT (match_id, user_id) DO NOTHING;
 
-  -- 10. Insert into transactions table so Wallet UI shows it
   INSERT INTO transactions (user_id, match_id, type, amount, status)
   VALUES (p_user_id, p_match_id, 'entry_fee', p_amount, 'completed');
 
   RETURN 'success';
 END;
- $$;
+$$;
 
 
 ALTER FUNCTION "public"."join_match_and_pay"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") OWNER TO "postgres";
@@ -1485,6 +1605,7 @@ CREATE TABLE IF NOT EXISTS "public"."match_players" (
     "survived_ms" integer DEFAULT 0,
     "flag_status" "text" DEFAULT 'none'::"text",
     "flag_reason" "text",
+    "is_in_lobby" boolean DEFAULT false NOT NULL,
     CONSTRAINT "match_players_flag_status_check" CHECK (("flag_status" = ANY (ARRAY['none'::"text", 'flagged'::"text", 'confirmed'::"text", 'overridden'::"text"]))),
     CONSTRAINT "match_players_result_check" CHECK (("result" = ANY (ARRAY['win'::"text", 'lose'::"text", 'disqualified'::"text", 'refunded'::"text"])))
 );
@@ -2221,6 +2342,12 @@ GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_use
 
 
 
+GRANT ALL ON FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_id" "uuid") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "anon";
 GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "service_role";
@@ -2236,6 +2363,12 @@ GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() TO "service_role";
 
 
 
@@ -2320,6 +2453,18 @@ GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "service_role";
 GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_user_stats"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_user_stats"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_user_stats"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) TO "service_role";
 
 
 
