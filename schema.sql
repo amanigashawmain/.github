@@ -61,11 +61,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 CREATE OR REPLACE FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ BEGIN
+    AS $$
+BEGIN
+  PERFORM require_admin(p_admin_id);
+
   INSERT INTO admin_notes (user_id, admin_id, note)
   VALUES (p_user_id, p_admin_id, p_note);
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid", "p_note" "text") OWNER TO "postgres";
@@ -73,31 +75,30 @@ ALTER FUNCTION "public"."add_admin_note"("p_admin_id" bigint, "p_user_id" "uuid"
 
 CREATE OR REPLACE FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_status TEXT;
   v_frozen BOOLEAN;
 BEGIN
-  -- Idempotency check
+  PERFORM require_admin(p_admin_id);
+
   IF EXISTS (SELECT 1 FROM audit_log WHERE metadata->>'idempotency_key' = p_idempotency_key) THEN
     RETURN;
   END IF;
 
-  -- Map action to columns
   v_status := CASE WHEN p_action = 'suspend' THEN 'suspended' WHEN p_action = 'ban' THEN 'banned' ELSE 'active' END;
   v_frozen := CASE WHEN p_action = 'freeze_withdrawals' THEN TRUE WHEN p_action = 'unfreeze_withdrawals' THEN FALSE ELSE NULL END;
 
-  -- Update user
   IF v_frozen IS NOT NULL THEN
     UPDATE users SET withdrawals_frozen = v_frozen WHERE id = p_user_id;
   ELSE
     UPDATE users SET status = v_status WHERE id = p_user_id;
   END IF;
 
-  -- Log to audit_log
   INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
-  VALUES (p_admin_id, 'dashboard', p_action, 'users', p_user_id::TEXT, p_reason, json_build_object('idempotency_key', p_idempotency_key));
-END;
- $$;
+  VALUES (p_admin_id, 'dashboard', p_action, 'users', p_user_id::TEXT, p_reason,
+    json_build_object('idempotency_key', p_idempotency_key));
+END; $$;
 
 
 ALTER FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "p_user_id" "uuid", "p_action" "text", "p_reason" "text", "p_idempotency_key" "text") OWNER TO "postgres";
@@ -114,10 +115,11 @@ DECLARE
   v_refunds BIGINT;
   v_calculated_balance BIGINT;
 BEGIN
+  PERFORM require_admin();
+
   SELECT COALESCE(SUM(amount), 0) INTO v_deposits
   FROM ledger_entries WHERE user_id = p_user_id AND type = 'deposit';
 
-  -- Net withdrawals: lock (-) plus reject (+) = 0 if rejected, else the locked amount.
   SELECT COALESCE(-1 * SUM(amount), 0) INTO v_withdrawals
   FROM ledger_entries
   WHERE user_id = p_user_id
@@ -142,8 +144,7 @@ BEGIN
     'refunds', v_refunds,
     'calculated_balance', v_calculated_balance
   );
-END;
-$$;
+END; $$;
 
 
 ALTER FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") OWNER TO "postgres";
@@ -190,6 +191,31 @@ END;
 
 
 ALTER FUNCTION "public"."check_balance_nonnegative"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."check_rate_limit"("p_user_id" "uuid", "p_action" "text", "p_max" integer, "p_window_seconds" integer) RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_count int;
+BEGIN
+  SELECT COUNT(*) INTO v_count
+  FROM public.rate_limit_events
+  WHERE user_id = p_user_id
+    AND action = p_action
+    AND created_at > now() - make_interval(secs => p_window_seconds);
+
+  IF v_count >= p_max THEN
+    RAISE EXCEPTION 'Rate limit exceeded for %. Try again later.', p_action;
+  END IF;
+
+  INSERT INTO public.rate_limit_events (user_id, action)
+  VALUES (p_user_id, p_action);
+END;
+$$;
+
+
+ALTER FUNCTION "public"."check_rate_limit"("p_user_id" "uuid", "p_action" "text", "p_max" integer, "p_window_seconds" integer) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") RETURNS "void"
@@ -344,6 +370,8 @@ DECLARE
   v_status text;
   v_exists boolean;
 BEGIN
+  PERFORM require_self(p_user_id);
+
   SELECT status INTO v_status FROM matches WHERE id = p_match_id FOR UPDATE;
   IF v_status IS NULL THEN RETURN 'match_not_found'; END IF;
   IF v_status != 'waiting' THEN RETURN 'already_started'; END IF;
@@ -366,31 +394,32 @@ ALTER FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_id" "uu
 
 CREATE OR REPLACE FUNCTION "public"."get_admin_dashboard_stats"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_total_balance BIGINT;
   v_pending_deposits INT;
   v_pending_withdrawals INT;
   v_active_matches INT;
   v_house_id UUID;
 BEGIN
+  PERFORM require_admin();
+
   SELECT id INTO v_house_id FROM users WHERE telegram_id = 0;
-  
-  -- Total user funds held in the system (excluding house account)
+
   SELECT COALESCE(SUM(amount), 0) INTO v_total_balance
   FROM ledger_entries WHERE user_id != v_house_id;
-  
+
   SELECT COUNT(*) INTO v_pending_deposits FROM transactions WHERE type = 'deposit' AND status = 'pending';
   SELECT COUNT(*) INTO v_pending_withdrawals FROM transactions WHERE type = 'withdraw' AND status = 'pending';
   SELECT COUNT(*) INTO v_active_matches FROM matches WHERE status IN ('waiting', 'live');
-  
+
   RETURN json_build_object(
     'total_balance', v_total_balance,
     'pending_deposits', v_pending_deposits,
     'pending_withdrawals', v_pending_withdrawals,
     'active_matches', v_active_matches
   );
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_admin_dashboard_stats"() OWNER TO "postgres";
@@ -398,9 +427,12 @@ ALTER FUNCTION "public"."get_admin_dashboard_stats"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_all_inquiries"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_inquiries JSON;
 BEGIN
+  PERFORM require_admin();
+
   SELECT COALESCE(json_agg(json_build_object(
     'id', cm.id,
     'message', cm.message,
@@ -409,17 +441,16 @@ BEGIN
     'created_at', cm.created_at,
     'user_id', cm.user_id,
     'username', u.username
-  ) ORDER BY 
-    CASE WHEN cm.status = 'open' THEN 0 ELSE 1 END, 
+  ) ORDER BY
+    CASE WHEN cm.status = 'open' THEN 0 ELSE 1 END,
     cm.created_at DESC
-  ), '[]'::json) 
-  INTO v_inquiries 
+  ), '[]'::json)
+  INTO v_inquiries
   FROM contact_messages cm
   JOIN users u ON u.id = cm.user_id;
 
   RETURN v_inquiries;
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_all_inquiries"() OWNER TO "postgres";
@@ -427,13 +458,16 @@ ALTER FUNCTION "public"."get_all_inquiries"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_audit_logs"("p_limit" integer DEFAULT 100) RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_logs JSON;
 BEGIN
+  PERFORM require_admin();
+
   SELECT COALESCE(json_agg(json_build_object(
     'id', al.id,
     'admin_id', al.admin_id,
-    'admin_username', au.role, -- Admins don't have a username in admin_users, so we use role or ID
+    'admin_username', au.role,
     'interface', al.interface,
     'action_type', al.action_type,
     'target_type', al.target_type,
@@ -441,15 +475,14 @@ BEGIN
     'reason', al.reason,
     'metadata', al.metadata,
     'created_at', al.created_at
-  ) ORDER BY al.created_at DESC), '[]'::json) 
-  INTO v_logs 
+  ) ORDER BY al.created_at DESC), '[]'::json)
+  INTO v_logs
   FROM audit_log al
   LEFT JOIN admin_users au ON au.telegram_id = al.admin_id
   LIMIT p_limit;
 
   RETURN v_logs;
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_audit_logs"("p_limit" integer) OWNER TO "postgres";
@@ -462,6 +495,8 @@ DECLARE
   v_details TEXT;
   v_created_at TIMESTAMPTZ;
 BEGIN
+  PERFORM require_admin();
+
   SELECT discrepancy_details, created_at
     INTO v_details, v_created_at
   FROM reconciliation_logs
@@ -473,12 +508,8 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  RETURN json_build_object(
-    'details', v_details,
-    'created_at', v_created_at
-  );
-END;
-$$;
+  RETURN json_build_object('details', v_details, 'created_at', v_created_at);
+END; $$;
 
 
 ALTER FUNCTION "public"."get_latest_failed_reconciliation"() OWNER TO "postgres";
@@ -486,44 +517,129 @@ ALTER FUNCTION "public"."get_latest_failed_reconciliation"() OWNER TO "postgres"
 
 CREATE OR REPLACE FUNCTION "public"."get_latest_reconciliation"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_status TEXT;
   v_details TEXT;
   v_created_at TIMESTAMPTZ;
 BEGIN
+  PERFORM require_admin();
+
   SELECT status, discrepancy_details, created_at INTO v_status, v_details, v_created_at
   FROM reconciliation_logs ORDER BY created_at DESC LIMIT 1;
-  
+
   RETURN json_build_object(
-    'status', v_status, 
-    'details', v_details, 
+    'status', v_status,
+    'details', v_details,
     'created_at', v_created_at
   );
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_latest_reconciliation"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."get_ledger_integrity_issues"("p_limit" integer DEFAULT 20) RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_issues json;
+  v_count int;
+BEGIN
+  WITH recent_matches AS (
+    SELECT id
+    FROM matches
+    WHERE status IN ('completed', 'cancelled')
+      AND scheduled_start > now() - interval '7 days'
+  ),
+  match_net AS (
+    SELECT
+      le.reference_id AS match_id,
+      SUM(le.amount)::bigint AS net_amount,
+      COUNT(*) AS entry_count
+    FROM ledger_entries le
+    JOIN recent_matches rm ON rm.id = le.reference_id
+    GROUP BY le.reference_id
+  )
+  SELECT
+    COALESCE(json_agg(row_to_json(offenders)), '[]'::json),
+    COUNT(*)
+  INTO v_issues, v_count
+  FROM (
+    SELECT match_id, net_amount, entry_count
+    FROM match_net
+    WHERE net_amount != 0
+    ORDER BY ABS(net_amount) DESC
+    LIMIT p_limit
+  ) offenders;
+
+  RETURN json_build_object(
+    'issues', v_issues,
+    'count', v_count
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."get_ledger_integrity_issues"("p_limit" integer) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_ledger_integrity_status"("p_admin_id" bigint DEFAULT NULL::bigint) RETURNS json
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_role text;
+  v_recent json;
+  v_last_status text;
+BEGIN
+  SELECT role INTO v_role FROM require_admin(p_admin_id);
+  IF v_role != 'super_admin' THEN
+    RAISE EXCEPTION 'Unauthorized: Super admin access required';
+  END IF;
+
+  SELECT COALESCE(json_agg(row_to_json(r) ORDER BY r.created_at DESC), '[]'::json)
+  INTO v_recent
+  FROM (
+    SELECT status, discrepancy_count, discrepancy_details, created_at
+    FROM ledger_integrity_logs
+    ORDER BY created_at DESC
+    LIMIT 5
+  ) r;
+
+  SELECT status INTO v_last_status
+  FROM ledger_integrity_logs
+  ORDER BY created_at DESC LIMIT 1;
+
+  RETURN json_build_object(
+    'last_status', COALESCE(v_last_status, 'unknown'),
+    'recent_runs', v_recent
+  );
+END; $$;
+
+
+ALTER FUNCTION "public"."get_ledger_integrity_status"("p_admin_id" bigint) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."get_lockdown_history"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_history JSON;
 BEGIN
+  PERFORM require_admin();
+
   SELECT COALESCE(json_agg(json_build_object(
     'id', id,
     'action', action,
     'admin_id', admin_id,
     'reason', reason,
     'created_at', created_at
-  ) ORDER BY created_at DESC), '[]'::json) 
-  INTO v_history 
+  ) ORDER BY created_at DESC), '[]'::json)
+  INTO v_history
   FROM lockdown_history;
-  
+
   RETURN v_history;
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_lockdown_history"() OWNER TO "postgres";
@@ -531,23 +647,26 @@ ALTER FUNCTION "public"."get_lockdown_history"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_match_players"("p_match_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ BEGIN
+    AS $$
+BEGIN
   RETURN COALESCE(jsonb_agg(
     jsonb_build_object(
-      'id', mp.id, 
-      'user_id', mp.user_id, 
+      'id', mp.id,
+      'user_id', mp.user_id,
       'username', (SELECT username FROM users WHERE id = mp.user_id),
       'result', mp.result,
       'reaction_time_ms', mp.reaction_time_ms,
       'survived_ms', mp.survived_ms,
       'disqualified', mp.result = 'disqualified',
+      'is_in_lobby', COALESCE(mp.is_in_lobby, false),
+      'disqualify_reason', mp.disqualify_reason,
       'isUser', mp.user_id = auth.uid()
     )
   ), '[]'::jsonb)
   FROM match_players mp
   WHERE mp.match_id = p_match_id;
 END;
- $$;
+$$;
 
 
 ALTER FUNCTION "public"."get_match_players"("p_match_id" "uuid") OWNER TO "postgres";
@@ -576,19 +695,34 @@ ALTER FUNCTION "public"."get_next_match"("p_game_type" "text") OWNER TO "postgre
 
 CREATE OR REPLACE FUNCTION "public"."get_revenue_stats"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_today BIGINT;
   v_week BIGINT;
+  v_forfeit_today BIGINT;
+  v_forfeit_week BIGINT;
 BEGIN
+  PERFORM require_admin();
+
   SELECT COALESCE(SUM(amount), 0) INTO v_today
   FROM ledger_entries WHERE type = 'platform_fee' AND created_at >= date_trunc('day', now());
-  
+
   SELECT COALESCE(SUM(amount), 0) INTO v_week
   FROM ledger_entries WHERE type = 'platform_fee' AND created_at >= date_trunc('week', now());
-  
-  RETURN json_build_object('today', v_today, 'week', v_week);
-END;
- $$;
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_forfeit_today
+  FROM ledger_entries WHERE type = 'forfeit_fee' AND created_at >= date_trunc('day', now());
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_forfeit_week
+  FROM ledger_entries WHERE type = 'forfeit_fee' AND created_at >= date_trunc('week', now());
+
+  RETURN json_build_object(
+    'today', v_today,
+    'week', v_week,
+    'forfeit_today', v_forfeit_today,
+    'forfeit_week', v_forfeit_week
+  );
+END; $$;
 
 
 ALTER FUNCTION "public"."get_revenue_stats"() OWNER TO "postgres";
@@ -607,9 +741,12 @@ ALTER FUNCTION "public"."get_server_time"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_sms_queue_logs"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_logs JSON;
 BEGIN
+  PERFORM require_admin();
+
   SELECT COALESCE(json_agg(json_build_object(
     'id', id,
     'raw_sms', raw_sms,
@@ -619,13 +756,12 @@ BEGIN
     'status', status,
     'admin_note', admin_note,
     'received_at', received_at
-  ) ORDER BY received_at DESC), '[]'::json) 
-  INTO v_logs 
+  ) ORDER BY received_at DESC), '[]'::json)
+  INTO v_logs
   FROM sms_queue;
-  
+
   RETURN v_logs;
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_sms_queue_logs"() OWNER TO "postgres";
@@ -633,32 +769,32 @@ ALTER FUNCTION "public"."get_sms_queue_logs"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_system_health"() RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_broadcasts JSON;
   v_recon JSON;
   v_sessions JSON;
 BEGIN
-  -- 1. Realtime Broadcast Stats (Last 24 hours)
+  PERFORM require_admin();
+
   SELECT json_build_object(
     'total', COUNT(*),
     'sent', COUNT(*) FILTER (WHERE status = 'sent')
-  ) INTO v_broadcasts 
-  FROM broadcast_logs 
+  ) INTO v_broadcasts
+  FROM broadcast_logs
   WHERE created_at > now() - interval '24 hours';
 
-  -- 2. Reconciliation History (Last 10 runs)
   SELECT COALESCE(json_agg(json_build_object(
-    'status', status, 
-    'details', discrepancy_details, 
+    'status', status,
+    'details', discrepancy_details,
     'created_at', created_at
   ) ORDER BY created_at DESC), '[]'::json) INTO v_recon
   FROM reconciliation_logs LIMIT 10;
 
-  -- 3. Admin Session/Interaction Log (Last 20 actions)
   SELECT COALESCE(json_agg(json_build_object(
-    'admin_id', admin_id, 
-    'interface', interface, 
-    'action', action_type, 
+    'admin_id', admin_id,
+    'interface', interface,
+    'action', action_type,
     'time', created_at
   ) ORDER BY created_at DESC), '[]'::json) INTO v_sessions
   FROM audit_log LIMIT 20;
@@ -668,8 +804,7 @@ BEGIN
     'reconciliation', v_recon,
     'sessions', v_sessions
   );
-END;
- $$;
+END; $$;
 
 
 ALTER FUNCTION "public"."get_system_health"() OWNER TO "postgres";
@@ -677,10 +812,13 @@ ALTER FUNCTION "public"."get_system_health"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_match RECORD;
   v_players JSON;
 BEGIN
+  PERFORM require_admin();
+
   SELECT * INTO v_match FROM matches WHERE id = p_match_id;
   IF NOT FOUND THEN RETURN json_build_object('error', 'Match not found'); END IF;
 
@@ -693,22 +831,18 @@ BEGIN
     'flag_status', mp.flag_status,
     'flag_reason', mp.flag_reason,
     'joined_at', mp.joined_at
-  ) ORDER BY 
+  ) ORDER BY
     CASE WHEN mp.result = 'win' THEN 0 ELSE 1 END,
     mp.reaction_time_ms ASC NULLS LAST,
     mp.survived_ms DESC NULLS LAST
-  ), '[]'::json) 
-  INTO v_players 
+  ), '[]'::json)
+  INTO v_players
   FROM match_players mp
   JOIN users u ON u.id = mp.user_id
   WHERE mp.match_id = p_match_id;
 
-  RETURN json_build_object(
-    'match', row_to_json(v_match),
-    'players', v_players
-  );
-END;
- $$;
+  RETURN json_build_object('match', row_to_json(v_match), 'players', v_players);
+END; $$;
 
 
 ALTER FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") OWNER TO "postgres";
@@ -791,32 +925,30 @@ END;
 ALTER FUNCTION "public"."get_user_match_history"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."get_user_profile"("p_identifier" "text") RETURNS json
+CREATE OR REPLACE FUNCTION "public"."get_user_profile"("p_identifier" "text", "p_admin_id" bigint DEFAULT NULL::bigint) RETURNS json
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_user RECORD;
   v_balance BIGINT;
   v_recent_txs JSON;
   v_recent_matches JSON;
   v_notes JSON;
 BEGIN
-  -- Find user by UUID or Username
+  PERFORM require_admin(p_admin_id);
+
   SELECT * INTO v_user FROM users WHERE id::TEXT = p_identifier OR username = p_identifier;
   IF NOT FOUND THEN RETURN json_build_object('error', 'User not found'); END IF;
 
-  -- Balance
   SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_user.id;
-  
-  -- Recent Transactions
-  SELECT COALESCE(json_agg(json_build_object('type', type, 'amount', amount, 'status', status, 'created_at', created_at) ORDER BY created_at DESC), '[]'::json) 
+
+  SELECT COALESCE(json_agg(json_build_object('type', type, 'amount', amount, 'status', status, 'created_at', created_at) ORDER BY created_at DESC), '[]'::json)
   INTO v_recent_txs FROM transactions WHERE user_id = v_user.id LIMIT 10;
-  
-  -- Recent Matches
-  SELECT COALESCE(json_agg(json_build_object('match_id', match_id, 'result', result, 'survived_ms', survived_ms, 'reaction_time_ms', reaction_time_ms) ORDER BY joined_at DESC), '[]'::json) 
+
+  SELECT COALESCE(json_agg(json_build_object('match_id', match_id, 'result', result, 'survived_ms', survived_ms, 'reaction_time_ms', reaction_time_ms) ORDER BY joined_at DESC), '[]'::json)
   INTO v_recent_matches FROM match_players WHERE user_id = v_user.id LIMIT 10;
-  
-  -- Admin Notes
-  SELECT COALESCE(json_agg(json_build_object('note', note, 'created_at', created_at) ORDER BY created_at DESC), '[]'::json) 
+
+  SELECT COALESCE(json_agg(json_build_object('note', note, 'created_at', created_at) ORDER BY created_at DESC), '[]'::json)
   INTO v_notes FROM admin_notes WHERE user_id = v_user.id;
 
   RETURN json_build_object(
@@ -830,11 +962,10 @@ BEGIN
     'recent_matches', v_recent_matches,
     'notes', v_notes
   );
-END;
- $$;
+END; $$;
 
 
-ALTER FUNCTION "public"."get_user_profile"("p_identifier" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_user_profile"("p_identifier" "text", "p_admin_id" bigint) OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_user_stats"() RETURNS json
@@ -937,6 +1068,14 @@ DECLARE
   v_current_players INT;
   v_already_in_match BOOLEAN;
 BEGIN
+  PERFORM require_self(p_user_id);
+
+  -- Rate limit: 10 join attempts per minute (fastest legitimate case: joining
+  -- a different match right after finishing one).
+  PERFORM check_rate_limit(p_user_id, 'join_match', 10, 60);
+
+  PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text, 0));
+
   SELECT status, pool_size, scheduled_start
     INTO v_match_status, v_pool_size, v_scheduled_start
   FROM matches WHERE id = p_match_id FOR UPDATE;
@@ -945,7 +1084,6 @@ BEGIN
     RETURN 'match_closed';
   END IF;
 
-  -- Reject late joins: within 10 seconds of scheduled_start
   IF v_scheduled_start - now() < interval '10 seconds' THEN
     RETURN 'match_closed';
   END IF;
@@ -992,77 +1130,62 @@ DECLARE
   v_idempotency_key TEXT;
   v_entry_fee BIGINT;
   v_should_refund BOOLEAN;
+  v_house_id UUID;
 BEGIN
-  -- 1. Lock the match row to serialize against scheduler / other leavers
-  SELECT status, scheduled_start
-    INTO v_match_status, v_scheduled_start
-  FROM matches
-  WHERE id = p_match_id
-  FOR UPDATE;
+  PERFORM require_self(p_user_id);
 
-  IF v_match_status IS NULL THEN
-    RETURN 'match_not_found';
-  END IF;
+  SELECT status, scheduled_start INTO v_match_status, v_scheduled_start
+  FROM matches WHERE id = p_match_id FOR UPDATE;
 
-  IF v_match_status != 'waiting' THEN
-    RETURN 'match_started';
-  END IF;
+  IF v_match_status IS NULL THEN RETURN 'match_not_found'; END IF;
+  IF v_match_status != 'waiting' THEN RETURN 'match_started'; END IF;
 
-  -- 2. Confirm the caller is actually a participant
   SELECT EXISTS (
-    SELECT 1 FROM match_players
-    WHERE match_id = p_match_id AND user_id = p_user_id
+    SELECT 1 FROM match_players WHERE match_id = p_match_id AND user_id = p_user_id
   ) INTO v_was_in_match;
+  IF NOT v_was_in_match THEN RETURN 'not_in_match'; END IF;
 
-  IF NOT v_was_in_match THEN
-    RETURN 'not_in_match';
-  END IF;
-
-  -- 3. Refund policy: >120s to scheduled_start = refunded, otherwise forfeited
   v_should_refund := (v_scheduled_start - now()) > interval '120 seconds';
 
-  -- 4. Remove the player from the match (safe: unique on match_id, user_id)
-  DELETE FROM match_players
-  WHERE match_id = p_match_id AND user_id = p_user_id;
+  IF v_should_refund AND EXISTS (
+    SELECT 1 FROM ledger_entries
+    WHERE user_id = p_user_id AND reference_id = p_match_id AND type IN ('refund', 'forfeit_fee')
+  ) THEN
+    v_should_refund := FALSE;
+  END IF;
 
-  -- 5. If refunding, credit back the original entry fee
+  DELETE FROM match_players WHERE match_id = p_match_id AND user_id = p_user_id;
+
+  SELECT ABS(amount) INTO v_entry_fee
+  FROM ledger_entries
+  WHERE user_id = p_user_id AND reference_id = p_match_id AND type = 'entry_fee'
+  ORDER BY created_at DESC LIMIT 1;
+  v_entry_fee := COALESCE(v_entry_fee, 50);
+
   IF v_should_refund THEN
-    -- Read the amount that was actually charged (do not hardcode 50)
-    SELECT ABS(amount)
-      INTO v_entry_fee
-    FROM ledger_entries
-    WHERE user_id = p_user_id
-      AND reference_id = p_match_id
-      AND type = 'entry_fee'
-    ORDER BY created_at DESC
-    LIMIT 1;
-
-    -- Defensive fallback if the entry fee row is somehow missing
-    v_entry_fee := COALESCE(v_entry_fee, 50);
-
     v_idempotency_key := 'leave_refund_' || p_match_id || '_' || p_user_id;
-
-    -- Lock the ledger rows so concurrent credits/debits serialize
     PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
-    SELECT COALESCE(SUM(amount), 0)
-      INTO v_balance
-    FROM ledger_entries
-    WHERE user_id = p_user_id;
+    SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = p_user_id;
 
-    INSERT INTO ledger_entries (
-      user_id, amount, type, reference_id, idempotency_key, balance_after
-    )
-    VALUES (
-      p_user_id, v_entry_fee, 'refund', p_match_id, v_idempotency_key,
-      v_balance + v_entry_fee
-    );
+    INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+    VALUES (p_user_id, v_entry_fee, 'refund', p_match_id, v_idempotency_key, v_balance + v_entry_fee);
 
-    -- Mirror into transactions so the Wallet UI shows the refund
     INSERT INTO transactions (user_id, match_id, type, amount, status)
     VALUES (p_user_id, p_match_id, 'refund', v_entry_fee, 'completed');
 
     RETURN 'refunded';
   ELSE
+    SELECT id INTO v_house_id FROM users WHERE telegram_id = 0;
+
+    IF v_house_id IS NOT NULL THEN
+      v_idempotency_key := 'forfeit_' || p_match_id || '_' || p_user_id;
+      PERFORM 1 FROM ledger_entries WHERE user_id = v_house_id FOR UPDATE;
+      SELECT COALESCE(SUM(amount), 0) INTO v_balance FROM ledger_entries WHERE user_id = v_house_id;
+
+      INSERT INTO ledger_entries (user_id, amount, type, reference_id, idempotency_key, balance_after)
+      VALUES (v_house_id, v_entry_fee, 'forfeit_fee', p_match_id, v_idempotency_key, v_balance + v_entry_fee);
+    END IF;
+
     RETURN 'forfeited';
   END IF;
 END;
@@ -1114,30 +1237,29 @@ ALTER FUNCTION "public"."notify_new_pending_transaction"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_match_id UUID;
   v_user_id UUID;
 BEGIN
+  PERFORM require_admin(p_admin_id);
+
   IF EXISTS (SELECT 1 FROM audit_log WHERE metadata->>'idempotency_key' = p_idempotency_key) THEN
     RETURN;
   END IF;
 
-  SELECT match_id, user_id INTO v_match_id, v_user_id FROM match_players WHERE id = p_match_player_id;
+  SELECT match_id, user_id INTO v_match_id, v_user_id
+  FROM match_players WHERE id = p_match_player_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'Match player not found'; END IF;
 
-  -- Update the player's result
-  UPDATE match_players 
+  UPDATE match_players
   SET result = p_new_result, flag_status = 'overridden', flag_reason = p_reason
   WHERE id = p_match_player_id;
 
-  -- If overriding to a win, we might need to process payout (simplified for now: just log it)
-  -- In a real system, you'd reverse the old winner's payout and pay the new one.
-
-  -- Log to audit_log
   INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
-  VALUES (p_admin_id, 'dashboard', 'override_anticheat', 'match_players', p_match_player_id::TEXT, p_reason, json_build_object('idempotency_key', p_idempotency_key, 'new_result', p_new_result));
-END;
- $$;
+  VALUES (p_admin_id, 'dashboard', 'override_anticheat', 'match_players', p_match_player_id::TEXT, p_reason,
+    json_build_object('idempotency_key', p_idempotency_key, 'new_result', p_new_result));
+END; $$;
 
 
 ALTER FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p_match_player_id" "uuid", "p_new_result" "text", "p_reason" "text", "p_idempotency_key" "text") OWNER TO "postgres";
@@ -1312,14 +1434,56 @@ $$;
 ALTER FUNCTION "public"."refund_match"("p_match_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."report_match_blur"("p_match_id" "uuid", "p_user_id" "uuid", "p_blur_count" integer) RETURNS "text"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_match_status text;
+  v_new_count int;
+BEGIN
+  PERFORM require_self(p_user_id);
+
+  SELECT status INTO v_match_status FROM matches WHERE id = p_match_id;
+  IF v_match_status != 'live' THEN
+    RETURN 'ignored';
+  END IF;
+
+  UPDATE match_players
+  SET blur_count = blur_count + p_blur_count
+  WHERE match_id = p_match_id AND user_id = p_user_id
+  RETURNING blur_count INTO v_new_count;
+
+  IF v_new_count >= 3 THEN
+    UPDATE match_players
+    SET flag_status = 'flagged',
+        flag_reason = 'Backgrounded app ' || v_new_count || ' times during a live match'
+    WHERE match_id = p_match_id AND user_id = p_user_id
+      AND (flag_status IS NULL OR flag_status != 'flagged');
+  END IF;
+
+  RETURN 'ok';
+END;
+$$;
+
+
+ALTER FUNCTION "public"."report_match_blur"("p_match_id" "uuid", "p_user_id" "uuid", "p_blur_count" integer) OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") RETURNS "uuid"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_balance BIGINT;
   v_tx_id UUID;
   v_existing_tx_id UUID;
   v_risk TEXT;
 BEGIN
+  PERFORM require_self(p_user_id);
+
+  -- Rate limit: 3 per 10 min, 10 per day.
+  PERFORM check_rate_limit(p_user_id, 'request_withdrawal', 3, 600);
+  PERFORM check_rate_limit(p_user_id, 'request_withdrawal_daily', 10, 86400);
+
   SELECT reference_id INTO v_existing_tx_id FROM ledger_entries WHERE idempotency_key = p_idempotency_key;
   IF FOUND THEN
     RETURN v_existing_tx_id;
@@ -1332,7 +1496,6 @@ BEGIN
     RAISE EXCEPTION 'Insufficient balance';
   END IF;
 
-  -- Calculate risk
   v_risk := calculate_withdrawal_risk(p_user_id);
 
   INSERT INTO transactions (user_id, type, amount, status, details, risk_flags)
@@ -1344,21 +1507,84 @@ BEGIN
 
   RETURN v_tx_id;
 END;
- $$;
+$$;
 
 
 ALTER FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."require_admin"("p_admin_id" bigint DEFAULT NULL::bigint) RETURNS TABLE("telegram_id" bigint, "role" "text")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+  v_tg bigint;
+  v_role text;
+BEGIN
+  -- Path 1: authenticated dashboard user → derive TG id from email
+  SELECT COALESCE(SUBSTRING(au.email FROM 'tg_(\d+)')::BIGINT, 0)
+    INTO v_tg
+    FROM auth.users au WHERE au.id = auth.uid();
+
+  IF v_tg IS NULL OR v_tg = 0 THEN
+    -- Path 2: no session → must be service_role (anon was revoked in Step 1).
+    -- Trust the passed p_admin_id and verify it exists as an active admin.
+    IF p_admin_id IS NOT NULL AND p_admin_id > 0 THEN
+      SELECT au2.role INTO v_role FROM admin_users au2
+      WHERE au2.telegram_id = p_admin_id AND au2.active = true;
+      IF v_role IS NULL THEN
+        RAISE EXCEPTION 'Unauthorized: Provided admin_id is not an active admin';
+      END IF;
+      RETURN QUERY SELECT p_admin_id, v_role;
+      RETURN;
+    END IF;
+    RAISE EXCEPTION 'Unauthorized: No admin session';
+  END IF;
+
+  -- Path 3: session user → look up in admin_users by TG id
+  SELECT au3.role INTO v_role FROM admin_users au3
+  WHERE au3.telegram_id = v_tg AND au3.active = true;
+
+  IF v_role IS NULL THEN
+    RAISE EXCEPTION 'Unauthorized: Not an active admin';
+  END IF;
+
+  RETURN QUERY SELECT v_tg, v_role;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."require_admin"("p_admin_id" bigint) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."require_self"("p_user_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Unauthorized: No session';
+  END IF;
+  IF p_user_id IS NULL OR p_user_id != auth.uid() THEN
+    RAISE EXCEPTION 'Unauthorized: Cannot act on behalf of another user';
+  END IF;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."require_self"("p_user_id" "uuid") OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_current_status TEXT;
-  v_interface TEXT;
+  v_verified_role TEXT;
 BEGIN
-  -- Determine interface based on admin_id range (bot is direct TG ID, dashboard passes TG ID too)
-  v_interface := 'bot'; -- Defaulting to bot for simplicity, can be 'dashboard' if called from Edge Function context
-  
+  SELECT role INTO v_verified_role FROM require_admin(p_admin_id);
+  IF v_verified_role != 'super_admin' THEN
+    RAISE EXCEPTION 'Unauthorized: Super admin access required';
+  END IF;
+
   SELECT status INTO v_current_status FROM system_settings WHERE id = 1;
   IF NOT FOUND THEN RAISE EXCEPTION 'System settings not found'; END IF;
 
@@ -1366,29 +1592,29 @@ BEGIN
     IF v_current_status = 'locked_down' THEN
       RAISE EXCEPTION 'App is already locked down.';
     END IF;
-    UPDATE system_settings 
-    SET status = 'locked_down', lockdown_reason = p_reason, updated_at = now(), activated_by = p_admin_id, activated_at = now() 
+    UPDATE system_settings
+    SET status = 'locked_down', lockdown_reason = p_reason, updated_at = now(),
+        activated_by = p_admin_id, activated_at = now()
     WHERE id = 1;
-    
+
     INSERT INTO lockdown_history (action, admin_id, reason) VALUES ('activate', p_admin_id, p_reason);
   ELSIF p_action = 'lift' THEN
     IF v_current_status = 'operational' THEN
       RAISE EXCEPTION 'App is already operational.';
     END IF;
-    UPDATE system_settings 
-    SET status = 'operational', lockdown_reason = NULL, updated_at = now(), activated_by = NULL, activated_at = NULL 
+    UPDATE system_settings
+    SET status = 'operational', lockdown_reason = NULL, updated_at = now(),
+        activated_by = NULL, activated_at = NULL
     WHERE id = 1;
-    
+
     INSERT INTO lockdown_history (action, admin_id, reason) VALUES ('lift', p_admin_id, p_reason);
   ELSE
     RAISE EXCEPTION 'Invalid action. Use activate or lift.';
   END IF;
 
-  -- Log to audit_log
   INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
-  VALUES (p_admin_id, v_interface, 'lockdown_' || p_action, 'system_settings', '1', p_reason, json_build_object());
-END;
- $$;
+  VALUES (p_admin_id, 'dashboard', 'lockdown_' || p_action, 'system_settings', '1', p_reason, json_build_object());
+END; $$;
 
 
 ALTER FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "text", "p_reason" "text") OWNER TO "postgres";
@@ -1396,35 +1622,38 @@ ALTER FUNCTION "public"."set_lockdown_status"("p_admin_id" bigint, "p_action" "t
 
 CREATE OR REPLACE FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") RETURNS "text"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_tx_id UUID;
   v_sms RECORD;
   v_balance BIGINT;
   v_idempotency_key TEXT;
   v_existing_status TEXT;
 BEGIN
-  -- 1. Check if this transaction number was already submitted (Idempotency)
-  SELECT status INTO v_existing_status FROM transactions 
+  PERFORM require_self(p_user_id);
+
+  -- Rate limit: 5 per 10 min, 20 per day.
+  PERFORM check_rate_limit(p_user_id, 'submit_deposit', 5, 600);
+  PERFORM check_rate_limit(p_user_id, 'submit_deposit_daily', 20, 86400);
+
+  SELECT status INTO v_existing_status FROM transactions
   WHERE reference_code = p_reference_code AND user_id = p_user_id;
-  
+
   IF FOUND THEN
     RETURN v_existing_status;
   END IF;
 
-  -- 2. Insert the pending transaction
   INSERT INTO transactions (user_id, type, amount, status, reference_code)
   VALUES (p_user_id, 'deposit', p_amount, 'pending', p_reference_code)
   RETURNING id INTO v_tx_id;
 
-  -- 3. Check sms_queue for an already-received SMS matching reference, amount, AND phone
-  SELECT * INTO v_sms FROM sms_queue 
-  WHERE parsed_reference = p_reference_code 
-    AND parsed_amount = p_amount 
+  SELECT * INTO v_sms FROM sms_queue
+  WHERE parsed_reference = p_reference_code
+    AND parsed_amount = p_amount
     AND status = 'unmatched'
     AND RIGHT(parsed_phone, 4) = p_phone_last4
   LIMIT 1;
 
-  -- 4. If the SMS already arrived, process the deposit instantly!
   IF FOUND THEN
     PERFORM 1 FROM ledger_entries WHERE user_id = p_user_id FOR UPDATE;
 
@@ -1445,7 +1674,7 @@ BEGIN
     RETURN 'pending';
   END IF;
 END;
- $$;
+$$;
 
 
 ALTER FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount" bigint, "p_reference_code" "text", "p_phone_last4" "text") OWNER TO "postgres";
@@ -1453,13 +1682,15 @@ ALTER FUNCTION "public"."submit_deposit_reference"("p_user_id" "uuid", "p_amount
 
 CREATE OR REPLACE FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$ DECLARE
+    AS $$
+DECLARE
   v_current_status TEXT;
   v_idempotency_key TEXT;
 BEGIN
+  PERFORM require_admin(p_admin_id);
+
   v_idempotency_key := 'inquiry_' || p_inquiry_id || '_' || p_admin_id;
-  
-  -- Idempotency check
+
   IF EXISTS (SELECT 1 FROM audit_log WHERE metadata->>'idempotency_key' = v_idempotency_key) THEN
     RETURN;
   END IF;
@@ -1467,24 +1698,13 @@ BEGIN
   SELECT status INTO v_current_status FROM contact_messages WHERE id = p_inquiry_id;
   IF NOT FOUND THEN RAISE EXCEPTION 'Inquiry not found'; END IF;
 
-  -- Update inquiry
-  UPDATE contact_messages 
-  SET status = p_new_status, assigned_to = p_admin_id 
-  WHERE id = p_inquiry_id;
+  UPDATE contact_messages SET status = p_new_status, assigned_to = p_admin_id WHERE id = p_inquiry_id;
 
-  -- Log to audit_log (using standard || concatenation)
   INSERT INTO audit_log (admin_id, interface, action_type, target_type, target_id, reason, metadata)
-  VALUES (
-    p_admin_id, 
-    'dashboard', 
-    'update_inquiry', 
-    'contact_messages', 
-    p_inquiry_id::TEXT, 
-    'Status changed from ' || v_current_status || ' to ' || p_new_status, 
-    json_build_object('idempotency_key', v_idempotency_key, 'new_status', p_new_status)
-  );
-END;
- $$;
+  VALUES (p_admin_id, 'dashboard', 'update_inquiry', 'contact_messages', p_inquiry_id::TEXT,
+    'Status changed from ' || v_current_status || ' to ' || p_new_status,
+    json_build_object('idempotency_key', v_idempotency_key, 'new_status', p_new_status));
+END; $$;
 
 
 ALTER FUNCTION "public"."update_inquiry_status"("p_admin_id" bigint, "p_inquiry_id" "uuid", "p_new_status" "text") OWNER TO "postgres";
@@ -1573,11 +1793,25 @@ CREATE TABLE IF NOT EXISTS "public"."ledger_entries" (
     "balance_after" bigint NOT NULL,
     "created_by" bigint,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'refund'::"text", 'platform_fee'::"text"])))
+    CONSTRAINT "ledger_entries_type_check" CHECK (("type" = ANY (ARRAY['deposit'::"text", 'withdrawal_lock'::"text", 'withdrawal_complete'::"text", 'withdrawal_reject'::"text", 'entry_fee'::"text", 'prize_payout'::"text", 'refund'::"text", 'platform_fee'::"text", 'forfeit_fee'::"text"])))
 );
 
 
 ALTER TABLE "public"."ledger_entries" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."ledger_integrity_logs" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "status" "text" NOT NULL,
+    "matches_checked" integer DEFAULT 0 NOT NULL,
+    "discrepancy_count" integer DEFAULT 0 NOT NULL,
+    "discrepancy_details" "text",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "ledger_integrity_logs_status_check" CHECK (("status" = ANY (ARRAY['pass'::"text", 'fail'::"text"])))
+);
+
+
+ALTER TABLE "public"."ledger_integrity_logs" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."lockdown_history" (
@@ -1606,6 +1840,7 @@ CREATE TABLE IF NOT EXISTS "public"."match_players" (
     "flag_status" "text" DEFAULT 'none'::"text",
     "flag_reason" "text",
     "is_in_lobby" boolean DEFAULT false NOT NULL,
+    "blur_count" integer DEFAULT 0 NOT NULL,
     CONSTRAINT "match_players_flag_status_check" CHECK (("flag_status" = ANY (ARRAY['none'::"text", 'flagged'::"text", 'confirmed'::"text", 'overridden'::"text"]))),
     CONSTRAINT "match_players_result_check" CHECK (("result" = ANY (ARRAY['win'::"text", 'lose'::"text", 'disqualified'::"text", 'refunded'::"text"])))
 );
@@ -1657,6 +1892,17 @@ CREATE TABLE IF NOT EXISTS "public"."notification_queue" (
 
 
 ALTER TABLE "public"."notification_queue" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."rate_limit_events" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "action" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
+);
+
+
+ALTER TABLE "public"."rate_limit_events" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."reconciliation_logs" (
@@ -1777,6 +2023,11 @@ ALTER TABLE ONLY "public"."ledger_entries"
 
 
 
+ALTER TABLE ONLY "public"."ledger_integrity_logs"
+    ADD CONSTRAINT "ledger_integrity_logs_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."lockdown_history"
     ADD CONSTRAINT "lockdown_history_pkey" PRIMARY KEY ("id");
 
@@ -1794,6 +2045,11 @@ ALTER TABLE ONLY "public"."matches"
 
 ALTER TABLE ONLY "public"."notification_queue"
     ADD CONSTRAINT "notification_queue_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."rate_limit_events"
+    ADD CONSTRAINT "rate_limit_events_pkey" PRIMARY KEY ("id");
 
 
 
@@ -1846,6 +2102,10 @@ CREATE INDEX "idx_ledger_user_id" ON "public"."ledger_entries" USING "btree" ("u
 
 
 CREATE UNIQUE INDEX "matches_game_type_scheduled_start_key" ON "public"."matches" USING "btree" ("game_type", "scheduled_start");
+
+
+
+CREATE INDEX "rate_limit_events_lookup" ON "public"."rate_limit_events" USING "btree" ("user_id", "action", "created_at" DESC);
 
 
 
@@ -2065,6 +2325,9 @@ ALTER TABLE "public"."contact_messages" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."ledger_entries" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."ledger_integrity_logs" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."lockdown_history" ENABLE ROW LEVEL SECURITY;
 
 
@@ -2075,6 +2338,9 @@ ALTER TABLE "public"."matches" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."notification_queue" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."rate_limit_events" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."reconciliation_logs" ENABLE ROW LEVEL SECURITY;
@@ -2294,14 +2560,13 @@ GRANT ALL ON FUNCTION "public"."admin_update_user_status"("p_admin_id" bigint, "
 
 
 
-GRANT ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") TO "anon";
+REVOKE ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."calculate_user_balance_breakdown"("p_user_id" "uuid") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."calculate_withdrawal_risk"("p_user_id" "uuid") TO "service_role";
 
 
@@ -2312,32 +2577,32 @@ GRANT ALL ON FUNCTION "public"."check_balance_nonnegative"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."check_rate_limit"("p_user_id" "uuid", "p_action" "text", "p_max" integer, "p_window_seconds" integer) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."check_rate_limit"("p_user_id" "uuid", "p_action" "text", "p_max" integer, "p_window_seconds" integer) TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."complete_deposit"("p_transaction_id" "uuid", "p_user_id" "uuid", "p_amount" bigint, "p_raw_sms" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."credit_balance"("p_amount" numeric) TO "anon";
-GRANT ALL ON FUNCTION "public"."credit_balance"("p_amount" numeric) TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."credit_balance"("p_amount" numeric) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."credit_balance"("p_amount" numeric) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."deduct_balance"("p_amount" numeric) TO "anon";
-GRANT ALL ON FUNCTION "public"."deduct_balance"("p_amount" numeric) TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."deduct_balance"("p_amount" numeric) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."deduct_balance"("p_amount" numeric) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) TO "anon";
-GRANT ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."deduct_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."dq_and_check_winner"("p_match_id" "uuid", "p_user_id" "uuid", "p_reason" "text") TO "service_role";
 
 
@@ -2348,37 +2613,49 @@ GRANT ALL ON FUNCTION "public"."enter_match_lobby"("p_match_id" "uuid", "p_user_
 
 
 
-GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_admin_dashboard_stats"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_admin_dashboard_stats"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_all_inquiries"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_all_inquiries"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_audit_logs"("p_limit" integer) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_latest_failed_reconciliation"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_latest_reconciliation"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_latest_reconciliation"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_lockdown_history"() TO "anon";
+GRANT ALL ON FUNCTION "public"."get_ledger_integrity_issues"("p_limit" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_ledger_integrity_issues"("p_limit" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_ledger_integrity_issues"("p_limit" integer) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."get_ledger_integrity_status"("p_admin_id" bigint) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_ledger_integrity_status"("p_admin_id" bigint) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_ledger_integrity_status"("p_admin_id" bigint) TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."get_lockdown_history"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_lockdown_history"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_lockdown_history"() TO "service_role";
 
@@ -2390,13 +2667,12 @@ GRANT ALL ON FUNCTION "public"."get_match_players"("p_match_id" "uuid") TO "serv
 
 
 
-GRANT ALL ON FUNCTION "public"."get_next_match"("p_game_type" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_next_match"("p_game_type" "text") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."get_next_match"("p_game_type" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_next_match"("p_game_type" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_revenue_stats"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_revenue_stats"() TO "service_role";
 
@@ -2408,26 +2684,25 @@ GRANT ALL ON FUNCTION "public"."get_server_time"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_sms_queue_logs"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_sms_queue_logs"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_sms_queue_logs"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_sms_queue_logs"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_system_health"() TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_system_health"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_system_health"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_system_health"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_tournament_details"("p_match_id" "uuid") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "anon";
-GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."get_user_active_matches"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_user_active_matches"() TO "service_role";
 
 
@@ -2438,8 +2713,7 @@ GRANT ALL ON FUNCTION "public"."get_user_balance"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_user_balance_by_id"("p_user_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_user_balance_by_id"("p_user_id" "uuid") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."get_user_balance_by_id"("p_user_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_user_balance_by_id"("p_user_id" "uuid") TO "service_role";
 
 
@@ -2450,9 +2724,9 @@ GRANT ALL ON FUNCTION "public"."get_user_match_history"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text", "p_admin_id" bigint) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text", "p_admin_id" bigint) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_user_profile"("p_identifier" "text", "p_admin_id" bigint) TO "service_role";
 
 
 
@@ -2462,7 +2736,7 @@ GRANT ALL ON FUNCTION "public"."get_user_stats"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) TO "anon";
+REVOKE ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_users_with_negative_balance"("p_limit" integer) TO "service_role";
 
@@ -2498,39 +2772,52 @@ GRANT ALL ON FUNCTION "public"."override_anticheat_flag"("p_admin_id" bigint, "p
 
 
 
-GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) TO "anon";
-GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."process_deposit"("p_user_id" "uuid", "p_amount" bigint, "p_reference_id" "uuid", "p_idempotency_key" "text", "p_admin_id" bigint) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."process_payout"("p_winner_id" "uuid", "p_amount" bigint, "p_match_id" "uuid", "p_platform_fee" bigint, "p_idempotency_key" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."process_tournament_entry"("p_user_id" "uuid", "p_match_id" "uuid", "p_amount" bigint, "p_idempotency_key" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."refund_entry_fee"("p_user_id" "uuid", "p_match_id" "uuid", "p_idempotency_key" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") TO "anon";
-GRANT ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") TO "authenticated";
+REVOKE ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."refund_match"("p_match_id" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."report_match_blur"("p_match_id" "uuid", "p_user_id" "uuid", "p_blur_count" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."report_match_blur"("p_match_id" "uuid", "p_user_id" "uuid", "p_blur_count" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."report_match_blur"("p_match_id" "uuid", "p_user_id" "uuid", "p_blur_count" integer) TO "service_role";
 
 
 
 GRANT ALL ON FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."request_withdrawal"("p_user_id" "uuid", "p_amount" bigint, "p_details" "jsonb", "p_idempotency_key" "text") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."require_admin"("p_admin_id" bigint) TO "anon";
+GRANT ALL ON FUNCTION "public"."require_admin"("p_admin_id" bigint) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."require_admin"("p_admin_id" bigint) TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."require_self"("p_user_id" "uuid") TO "anon";
+GRANT ALL ON FUNCTION "public"."require_self"("p_user_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."require_self"("p_user_id" "uuid") TO "service_role";
 
 
 
@@ -2609,6 +2896,12 @@ GRANT ALL ON TABLE "public"."ledger_entries" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."ledger_integrity_logs" TO "anon";
+GRANT ALL ON TABLE "public"."ledger_integrity_logs" TO "authenticated";
+GRANT ALL ON TABLE "public"."ledger_integrity_logs" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."lockdown_history" TO "anon";
 GRANT ALL ON TABLE "public"."lockdown_history" TO "authenticated";
 GRANT ALL ON TABLE "public"."lockdown_history" TO "service_role";
@@ -2630,6 +2923,12 @@ GRANT ALL ON TABLE "public"."matches" TO "service_role";
 GRANT ALL ON TABLE "public"."notification_queue" TO "anon";
 GRANT ALL ON TABLE "public"."notification_queue" TO "authenticated";
 GRANT ALL ON TABLE "public"."notification_queue" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."rate_limit_events" TO "anon";
+GRANT ALL ON TABLE "public"."rate_limit_events" TO "authenticated";
+GRANT ALL ON TABLE "public"."rate_limit_events" TO "service_role";
 
 
 
